@@ -1,18 +1,24 @@
 
 import React, { useRef, useCallback, useEffect } from 'react';
-import { useTryOnStore } from '@/store/try-on-store';
-import { ShutterButton } from './ShutterButton';
 import { useToast } from '@/hooks/use-toast';
+import { cn } from '@/lib/utils';
+import { ShutterButton } from './ShutterButton';
 
-export function ModelCapture() {
-  const { setModelImage, setAppState } = useTryOnStore();
+interface CameraViewProps {
+  onCapture: (dataUrl: string) => void;
+  onCameraError?: () => void;
+  className?: string;
+}
+
+export function CameraView({ onCapture, onCameraError, className }: CameraViewProps) {
   const videoRef = useRef<HTMLVideoElement>(null);
   const { toast } = useToast();
 
   useEffect(() => {
+    let stream: MediaStream | null = null;
     async function setupCamera() {
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        stream = await navigator.mediaDevices.getUserMedia({ video: true });
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
         }
@@ -23,17 +29,15 @@ export function ModelCapture() {
           description: "Could not access your camera. Please check your browser permissions.",
           variant: "destructive",
         });
-        setAppState('WELCOME');
+        if (onCameraError) onCameraError();
       }
     }
     setupCamera();
 
     return () => {
-      if (videoRef.current && videoRef.current.srcObject) {
-        (videoRef.current.srcObject as MediaStream).getTracks().forEach(track => track.stop());
-      }
+      stream?.getTracks().forEach(track => track.stop());
     };
-  }, [setAppState, toast]);
+  }, [onCameraError, toast]);
 
   const handleCapture = useCallback(() => {
     const video = videoRef.current;
@@ -41,20 +45,24 @@ export function ModelCapture() {
       const canvas = document.createElement('canvas');
       canvas.width = video.videoWidth;
       canvas.height = video.videoHeight;
-      canvas.getContext('2d')?.drawImage(video, 0, 0, canvas.width, canvas.height);
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.translate(canvas.width, 0);
+        ctx.scale(-1, 1);
+        ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+      }
       const dataUrl = canvas.toDataURL('image/jpeg');
-      setModelImage(dataUrl);
-      setAppState('GARMENT_UPLOAD');
+      onCapture(dataUrl);
     }
-  }, [setModelImage, setAppState]);
+  }, [onCapture]);
 
   return (
-    <div className="w-full h-full flex flex-col items-center justify-center animate-fade-in">
-      <div className="relative w-full max-w-lg aspect-[3/4] rounded-4xl bg-slate-200 overflow-hidden shadow-2xl ring-4 ring-white/50">
+    <div className={cn("w-full h-full flex flex-col items-center justify-center bg-slate-200", className)}>
+      <div className="relative w-full h-full overflow-hidden">
         <video ref={videoRef} autoPlay playsInline className="w-full h-full object-cover transform scaleX-[-1]" />
-      </div>
-      <div className="absolute bottom-20">
-        <ShutterButton onClick={handleCapture} />
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2">
+          <ShutterButton onClick={handleCapture} />
+        </div>
       </div>
     </div>
   );

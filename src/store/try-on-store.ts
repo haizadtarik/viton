@@ -2,7 +2,7 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 
-type AppState = 'WELCOME' | 'MODEL_CAPTURE' | 'GARMENT_UPLOAD' | 'LOADING' | 'RESULT';
+type AppState = 'WELCOME' | 'MODEL_SELECTION' | 'GARMENT_UPLOAD' | 'LOADING' | 'RESULT';
 
 interface TryOnState {
   appState: AppState;

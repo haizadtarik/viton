@@ -4,7 +4,7 @@ import { cn } from '@/lib/utils';
 import { useTryOnStore } from '@/store/try-on-store';
 
 const STEPS = [
-  { id: 'MODEL_CAPTURE', name: 'Model', icon: Icons.User },
+  { id: 'MODEL_SELECTION', name: 'Model', icon: Icons.User },
   { id: 'GARMENT_UPLOAD', name: 'Garment', icon: Icons.Shirt },
   { id: 'RESULT', name: 'Result', icon: Icons.Sparkles },
 ];
@@ -14,8 +14,8 @@ export function Dock() {
 
   const currentStateIndex = STEPS.findIndex(step => 
       appState === 'WELCOME' ? -1 : 
-      appState === 'LOADING' ? 1 :
-      appState.startsWith(step.id)
+      appState === 'LOADING' ? STEPS.findIndex(s => s.id === 'GARMENT_UPLOAD') :
+      step.id === appState
   );
 
   return (

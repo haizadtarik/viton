@@ -1,44 +1,31 @@
 
-import React, { useCallback, useState } from 'react';
-import { useDropzone } from 'react-dropzone';
+import React, { useState } from 'react';
 import { useTryOnStore } from '@/store/try-on-store';
 import { Icons } from '../icons';
 import { Button } from '../ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { vitonApi } from '@/services/viton-api';
+import { ImageSourceToggle } from './ImageSourceToggle';
+import { UploadView } from './UploadView';
+import { CameraView } from './CameraView';
 
 export function GarmentUpload() {
-  const { modelImage, setGarmentImage, setAppState, setResultImages } = useTryOnStore();
-  const [garmentPreview, setGarmentPreview] = useState<string | null>(null);
+  const { modelImage, garmentImage, setGarmentImage, setAppState, setResultImages } = useTryOnStore();
+  const [source, setSource] = useState<'upload' | 'camera'>('upload');
   const { toast } = useToast();
 
-  const onDrop = useCallback((acceptedFiles: File[]) => {
-    const file = acceptedFiles[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const base64 = e.target?.result as string;
-        setGarmentImage(base64);
-        setGarmentPreview(URL.createObjectURL(file));
-      };
-      reader.readAsDataURL(file);
-    }
-  }, [setGarmentImage]);
-
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
-    accept: { 'image/*': ['.jpeg', '.png', '.jpg'] },
-    maxFiles: 1,
-  });
+  const handleImageProvided = (dataUrl: string) => {
+    setGarmentImage(dataUrl);
+  };
   
   const handleGenerate = async () => {
-    if (!modelImage || !useTryOnStore.getState().garmentImage) {
+    if (!modelImage || !garmentImage) {
         toast({ title: "Missing Images", description: "Please provide both a model and a garment image.", variant: "destructive" });
         return;
     }
     setAppState('LOADING');
     try {
-        const results = await vitonApi.generate(modelImage, useTryOnStore.getState().garmentImage!);
+        const results = await vitonApi.generate(modelImage, garmentImage);
         setResultImages(results);
         setAppState('RESULT');
     } catch (error) {
@@ -48,32 +35,48 @@ export function GarmentUpload() {
     }
   };
 
-
-  return (
-    <div className="w-full h-full flex flex-col items-center justify-center animate-fade-in gap-8">
-        <h1 className="text-4xl font-bold text-center text-slate-800">Upload a Garment</h1>
-        <div className="flex gap-8">
-            <div className="w-64 h-80 rounded-3xl bg-slate-200 overflow-hidden shadow-lg">
-                <img src={modelImage!} alt="Your captured photo" className="w-full h-full object-cover"/>
-            </div>
-            <div
-                {...getRootProps()}
-                className={`w-64 h-80 rounded-3xl border-4 border-dashed flex items-center justify-center text-center p-4 cursor-pointer transition-colors ${
-                isDragActive ? 'border-blue-500 bg-blue-50' : 'border-slate-300 bg-slate-100/50'
-                }`}
-            >
-                <input {...getInputProps()} />
-                {garmentPreview ? (
-                    <img src={garmentPreview} alt="Garment preview" className="w-full h-full object-contain"/>
-                ) : (
-                    <div className="flex flex-col items-center gap-2 text-slate-500">
-                        <Icons.UploadCloud className="h-12 w-12" />
-                        <p>Drop your garment here, or click to select</p>
-                    </div>
-                )}
+  const renderGarmentSelector = () => {
+      if (garmentImage) {
+          return (
+              <div className="w-64 h-80 rounded-3xl bg-slate-200 overflow-hidden shadow-lg relative">
+                  <img src={garmentImage} alt="Garment" className="w-full h-full object-contain"/>
+                  <Button onClick={() => setGarmentImage(null)} variant="secondary" size="sm" className="absolute top-2 right-2 rounded-full">
+                      Change
+                  </Button>
+              </div>
+          )
+      }
+      return (
+        <div className="flex flex-col gap-4 items-center">
+            <ImageSourceToggle value={source} onChange={setSource} />
+            <div className="w-64 h-80 rounded-3xl overflow-hidden bg-slate-200">
+              {source === 'upload' ? (
+                  <UploadView onUpload={handleImageProvided} title="Drop garment here" className="h-full" />
+              ) : (
+                  <CameraView onCapture={handleImageProvided} onCameraError={() => setSource('upload')} />
+              )}
             </div>
         </div>
-        <Button onClick={handleGenerate} size="lg" className="rounded-full px-8 py-6 text-lg font-semibold shadow-lg" disabled={!garmentPreview}>
+      )
+  }
+
+  return (
+    <div className="w-full flex flex-col items-center justify-center animate-fade-in gap-8 p-4">
+        <h1 className="text-4xl font-bold text-center text-slate-800">Provide Garment</h1>
+        <div className="flex flex-wrap justify-center gap-8 items-start">
+            <div className="flex flex-col items-center gap-2">
+                <h2 className="text-lg font-medium text-slate-600">Your Model</h2>
+                <div className="w-64 h-80 rounded-3xl bg-slate-200 overflow-hidden shadow-lg">
+                    <img src={modelImage!} alt="Your captured photo" className="w-full h-full object-cover"/>
+                </div>
+            </div>
+            
+            <div className="flex flex-col items-center gap-2">
+                <h2 className="text-lg font-medium text-slate-600">The Garment</h2>
+                {renderGarmentSelector()}
+            </div>
+        </div>
+        <Button onClick={handleGenerate} size="lg" className="rounded-full px-8 py-6 text-lg font-semibold shadow-lg" disabled={!garmentImage}>
             <Icons.Sparkles className="mr-2 h-5 w-5"/>
             Generate Try-On
         </Button>

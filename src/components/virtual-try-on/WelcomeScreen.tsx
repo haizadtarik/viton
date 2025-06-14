@@ -11,7 +11,7 @@ export function WelcomeScreen() {
             <p className="mt-4 text-xl text-slate-600 max-w-2xl mx-auto">
                 See how an outfit looks on you in seconds. Powered by AI.
             </p>
-            <Button onClick={() => setAppState('MODEL_CAPTURE')} size="lg" className="mt-12 rounded-full px-10 py-8 text-xl font-bold shadow-lg animate-pulse-subtle bg-gradient-to-br from-blue-500 to-indigo-600 text-white hover:from-blue-600 hover:to-indigo-700">
+            <Button onClick={() => setAppState('MODEL_SELECTION')} size="lg" className="mt-12 rounded-full px-10 py-8 text-xl font-bold shadow-lg animate-pulse-subtle bg-gradient-to-br from-blue-500 to-indigo-600 text-white hover:from-blue-600 hover:to-indigo-700">
                 <Icons.Camera className="mr-3 h-7 w-7"/>
                 Start Try-On
             </Button>

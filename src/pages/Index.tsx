@@ -1,7 +1,7 @@
 
 import { useTryOnStore } from '@/store/try-on-store';
 import { WelcomeScreen } from '@/components/virtual-try-on/WelcomeScreen';
-import { ModelCapture } from '@/components/virtual-try-on/ModelCapture';
+import { ModelSelection } from '@/components/virtual-try-on/ModelSelection';
 import { GarmentUpload } from '@/components/virtual-try-on/GarmentUpload';
 import { LoadingView } from '@/components/virtual-try-on/LoadingView';
 import { ResultView } from '@/components/virtual-try-on/ResultView';
@@ -24,8 +24,8 @@ const Index = () => {
     switch (appState) {
       case 'WELCOME':
         return <WelcomeScreen />;
-      case 'MODEL_CAPTURE':
-        return <ModelCapture />;
+      case 'MODEL_SELECTION':
+        return <ModelSelection />;
       case 'GARMENT_UPLOAD':
         return <GarmentUpload />;
       case 'LOADING':
