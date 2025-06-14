@@ -10,9 +10,9 @@ export const vitonApi = {
     await new Promise(resolve => setTimeout(resolve, 3000));
     
     // In a real scenario, you'd get back a new image.
-    // Here, we'll return a modified version of the model image for demonstration.
-    // For this MVP, we just return the model image to show the flow is working.
+    // Here, we'll return the garment image instead of the model image
+    // to make it clearer that the mock process completed.
     console.log("Mock API processing complete.");
-    return [model_image_base64];
+    return [garment_image_base64];
   },
 };
