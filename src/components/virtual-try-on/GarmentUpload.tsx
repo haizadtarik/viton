@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useTryOnStore } from '@/store/try-on-store';
 import { Icons } from '../icons';
@@ -30,7 +29,13 @@ export function GarmentUpload() {
         setAppState('RESULT');
     } catch (error) {
         console.error("Error generating try-on:", error);
-        toast({ title: "Generation Failed", description: "Something went wrong. Please try again.", variant: "destructive" });
+        const errorMessage = error instanceof Error ? error.message : "An unknown error occurred. Please try again.";
+        toast({
+          title: "Generation Failed",
+          description: errorMessage,
+          variant: "destructive",
+          duration: 9000,
+        });
         setAppState('GARMENT_UPLOAD');
     }
   };
