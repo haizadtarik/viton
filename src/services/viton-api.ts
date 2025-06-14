@@ -1,9 +1,8 @@
 
 // This service connects to the backend virtual try-on API.
 
-// We'll use a relative path for the API URL. This assumes the frontend
-// and backend are served from the same domain, or a proxy is set up.
-const API_URL = '/viton'; 
+// The backend is hosted on a different domain, so we use the full URL.
+const API_URL = 'https://haizadtarik--vton-vtonapp-fastapi-app.modal.run/viton';
 
 // Helper to strip the data URL prefix (e.g., "data:image/jpeg;base64,")
 // as the API likely expects raw base64 data.
@@ -16,7 +15,7 @@ const getBase64Data = (dataUrl: string) => {
 
 export const vitonApi = {
   generate: async (model_image_base64: string, garment_image_base64: string): Promise<string[]> => {
-    console.log("Calling real Viton API...");
+    console.log("Calling real Viton API at:", API_URL);
 
     const requestBody = {
         model_image_base64: getBase64Data(model_image_base64),

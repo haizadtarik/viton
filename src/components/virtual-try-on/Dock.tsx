@@ -19,7 +19,7 @@ export function Dock() {
   );
 
   return (
-    <footer className="fixed bottom-24 left-1/2 -translate-x-1/2 z-50">
+    <footer className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50">
       <div className="frosted-glass flex items-center gap-2 rounded-full border border-white/30 p-2 shadow-lg">
         {STEPS.map((step, index) => {
           const isCompleted = currentStateIndex > index;
