@@ -1,12 +1,46 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+
+import { useTryOnStore } from '@/store/try-on-store';
+import { WelcomeScreen } from '@/components/virtual-try-on/WelcomeScreen';
+import { ModelCapture } from '@/components/virtual-try-on/ModelCapture';
+import { GarmentUpload } from '@/components/virtual-try-on/GarmentUpload';
+import { LoadingView } from '@/components/virtual-try-on/LoadingView';
+import { ResultView } from '@/components/virtual-try-on/ResultView';
+import { Dock } from '@/components/virtual-try-on/Dock';
+import { useEffect, useState } from 'react';
 
 const Index = () => {
+  // This ensures the store is rehydrated from localStorage before rendering.
+  const [isHydrated, setIsHydrated] = useState(false);
+  const { appState } = useTryOnStore();
+  
+  useEffect(() => {
+    setIsHydrated(true);
+  }, []);
+
+  const renderContent = () => {
+    if (!isHydrated) {
+      return null; // Or a loading spinner
+    }
+    switch (appState) {
+      case 'WELCOME':
+        return <WelcomeScreen />;
+      case 'MODEL_CAPTURE':
+        return <ModelCapture />;
+      case 'GARMENT_UPLOAD':
+        return <GarmentUpload />;
+      case 'LOADING':
+        return <LoadingView />;
+      case 'RESULT':
+        return <ResultView />;
+      default:
+        return <WelcomeScreen />;
+    }
+  };
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="text-4xl font-bold mb-4">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
-      </div>
+    <div className="relative min-h-screen w-full flex items-center justify-center p-4 overflow-hidden">
+      {renderContent()}
+      {isHydrated && appState !== 'WELCOME' && <Dock />}
     </div>
   );
 };
