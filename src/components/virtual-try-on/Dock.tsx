@@ -42,13 +42,14 @@ export function Dock() {
             <div
               key={step.id}
               className={cn(
-                "flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all duration-300",
+                "flex items-center justify-center rounded-full text-sm font-medium transition-all duration-300",
+                "h-10 w-10 md:w-auto md:px-4 md:py-2 md:gap-2",
                 isCompleted ? "bg-blue-600 text-white" : "text-slate-600",
                 isActive && "bg-blue-700 text-white shadow-sm ring-2 ring-white/50"
               )}
             >
-              <step.icon className="h-5 w-5" />
-              <span>{step.name}</span>
+              <step.icon className="h-5 w-5 shrink-0" />
+              <span className="hidden md:inline">{step.name}</span>
             </div>
           );
         })}
