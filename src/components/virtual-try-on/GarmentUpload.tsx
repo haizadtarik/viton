@@ -68,7 +68,7 @@ export function GarmentUpload() {
   return (
     <div className="w-full flex flex-col items-center justify-center animate-fade-in gap-8 p-4">
         <h1 className="text-4xl font-bold text-center text-slate-800">Provide Garment</h1>
-        <div className="flex flex-wrap justify-center gap-8 items-start">
+        <div className="flex flex-wrap justify-center gap-8 items-end">
             <div className="flex flex-col items-center gap-2">
                 <h2 className="text-lg font-medium text-slate-600">Your Model</h2>
                 <div className="w-64 h-80 rounded-3xl bg-slate-200 overflow-hidden shadow-lg">
