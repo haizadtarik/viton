@@ -9,16 +9,10 @@ interface TryOnState {
   modelImage: string | null;
   garmentImage: string | null;
   resultImages: string[];
-  styleDescription: string;
-  styleAssessment: string | null;
-  isAssessingStyle: boolean;
   setAppState: (state: AppState) => void;
   setModelImage: (image: string | null) => void;
   setGarmentImage: (image: string | null) => void;
   setResultImages: (images: string[]) => void;
-  setStyleDescription: (description: string) => void;
-  setStyleAssessment: (assessment: string | null) => void;
-  setIsAssessingStyle: (loading: boolean) => void;
   reset: () => void;
 }
 
@@ -27,9 +21,6 @@ const initialState = {
   modelImage: null,
   garmentImage: null,
   resultImages: [],
-  styleDescription: '',
-  styleAssessment: null,
-  isAssessingStyle: false,
 };
 
 export const useTryOnStore = create<TryOnState>()(
@@ -40,9 +31,6 @@ export const useTryOnStore = create<TryOnState>()(
       setModelImage: (image) => set({ modelImage: image }),
       setGarmentImage: (image) => set({ garmentImage: image }),
       setResultImages: (images) => set({ resultImages: images }),
-      setStyleDescription: (description) => set({ styleDescription: description }),
-      setStyleAssessment: (assessment) => set({ styleAssessment: assessment }),
-      setIsAssessingStyle: (loading) => set({ isAssessingStyle: loading }),
       reset: () => set(initialState),
     }),
     {
