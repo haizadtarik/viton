@@ -37,10 +37,16 @@ const Index = () => {
     }
   };
 
+  const showDock = isHydrated && appState !== 'WELCOME';
+
   return (
-    <div className="relative min-h-screen w-full flex items-center justify-center p-4 overflow-hidden">
+    <div
+      className={`relative min-h-screen w-full flex items-center justify-center p-4 overflow-hidden transition-all duration-300 ${
+        showDock ? 'pb-28' : ''
+      }`}
+    >
       {renderContent()}
-      {isHydrated && appState !== 'WELCOME' && <Dock />}
+      {showDock && <Dock />}
     </div>
   );
 };
