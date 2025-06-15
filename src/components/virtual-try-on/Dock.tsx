@@ -10,29 +10,33 @@ const STEPS = [
 ];
 
 export function Dock() {
-  const { appState } = useTryOnStore();
+  const { appState, modelImage, garmentImage, resultImages } = useTryOnStore();
 
-  const currentStateIndex = (() => {
-    if (appState === 'WELCOME') {
-      return -1;
+  const isStepCompleted = (stepId: string) => {
+    switch (stepId) {
+      case 'MODEL_SELECTION':
+        return !!modelImage;
+      case 'GARMENT_UPLOAD':
+        return !!garmentImage;
+      case 'RESULT':
+        return resultImages.length > 0;
+      default:
+        return false;
     }
-    if (appState === 'RESULT') {
-      // All steps are completed
-      return STEPS.length;
-    }
-    if (appState === 'LOADING') {
-      // While loading, we show Result as "active" and previous steps as "completed".
-      return STEPS.findIndex(s => s.id === 'RESULT');
-    }
-    return STEPS.findIndex(step => step.id === appState);
-  })();
+  };
+
+  const activeStepIndex = STEPS.findIndex((step) => step.id === appState);
+  const resultStepIndex = STEPS.findIndex((step) => step.id === 'RESULT');
 
   return (
     <footer className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50">
       <div className="frosted-glass flex items-center gap-2 rounded-full border border-white/30 p-2 shadow-lg">
         {STEPS.map((step, index) => {
-          const isCompleted = currentStateIndex > index;
-          const isActive = currentStateIndex === index;
+          const isCompleted = isStepCompleted(step.id);
+          const isActive =
+            appState === 'LOADING'
+              ? index === resultStepIndex
+              : activeStepIndex === index;
 
           return (
             <div
