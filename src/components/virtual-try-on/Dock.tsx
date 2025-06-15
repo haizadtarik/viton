@@ -16,9 +16,13 @@ export function Dock() {
     if (appState === 'WELCOME') {
       return -1;
     }
+    if (appState === 'RESULT') {
+      // All steps are completed
+      return STEPS.length;
+    }
     if (appState === 'LOADING') {
-      // While loading, we show Garment as "active" and Model as "completed".
-      return STEPS.findIndex(s => s.id === 'GARMENT_UPLOAD');
+      // While loading, we show Result as "active" and previous steps as "completed".
+      return STEPS.findIndex(s => s.id === 'RESULT');
     }
     return STEPS.findIndex(step => step.id === appState);
   })();
@@ -36,7 +40,7 @@ export function Dock() {
               className={cn(
                 "flex items-center gap-2 rounded-full px-4 py-2 text-sm font-medium transition-all duration-300",
                 isCompleted ? "bg-blue-600 text-white" : "text-slate-600",
-                isActive && "bg-white shadow-sm text-blue-700"
+                isActive && "bg-blue-700 text-white shadow-sm ring-2 ring-white/50"
               )}
             >
               <step.icon className="h-5 w-5" />
