@@ -12,11 +12,16 @@ const STEPS = [
 export function Dock() {
   const { appState } = useTryOnStore();
 
-  const currentStateIndex = STEPS.findIndex(step => 
-      appState === 'WELCOME' ? -1 : 
-      appState === 'LOADING' ? STEPS.findIndex(s => s.id === 'GARMENT_UPLOAD') :
-      step.id === appState
-  );
+  const currentStateIndex = (() => {
+    if (appState === 'WELCOME') {
+      return -1;
+    }
+    if (appState === 'LOADING') {
+      // While loading, we show Garment as "active" and Model as "completed".
+      return STEPS.findIndex(s => s.id === 'GARMENT_UPLOAD');
+    }
+    return STEPS.findIndex(step => step.id === appState);
+  })();
 
   return (
     <footer className="fixed bottom-4 left-1/2 -translate-x-1/2 z-50">
