@@ -11,6 +11,8 @@ import {
   RefreshCcw,
   UploadCloud,
   LoaderCircle,
+  Link,
+  Loader2,
 } from 'lucide-react';
 
 export const Icons = {
@@ -25,4 +27,6 @@ export const Icons = {
   RefreshCcw,
   UploadCloud,
   Loader: LoaderCircle,
+  Link,
+  Loader2,
 };
