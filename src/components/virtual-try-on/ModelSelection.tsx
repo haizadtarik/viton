@@ -4,11 +4,12 @@ import { useTryOnStore } from '@/store/try-on-store';
 import { ImageSourceToggle } from './ImageSourceToggle';
 import { CameraView } from './CameraView';
 import { UploadView } from './UploadView';
+import { UrlView } from './UrlView';
 import { Button } from '@/components/ui/button';
 import { Icons } from '@/components/icons';
 
 export function ModelSelection() {
-  const [source, setSource] = useState<'upload' | 'camera'>('upload');
+  const [source, setSource] = useState<'upload' | 'camera' | 'url'>('upload');
   const { modelImage, setModelImage, setAppState } = useTryOnStore();
 
   const handleImageProvided = (dataUrl: string) => {
@@ -38,8 +39,10 @@ export function ModelSelection() {
             <div className="w-full max-w-lg aspect-[3/4] rounded-3xl overflow-hidden bg-slate-200">
               {source === 'upload' ? (
                   <UploadView onUpload={handleImageProvided} title="Drop your photo here" className="h-full" />
-              ) : (
+              ) : source === 'camera' ? (
                   <CameraView onCapture={handleImageProvided} onCameraError={() => setSource('upload')} />
+              ) : (
+                  <UrlView onUrlLoad={handleImageProvided} title="Enter image URL" className="h-full" />
               )}
             </div>
         </div>

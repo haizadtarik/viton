@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Icons } from '@/components/icons';
 import { cn } from '@/lib/utils';
 
-type Source = 'upload' | 'camera';
+type Source = 'upload' | 'camera' | 'url';
 
 interface ImageSourceToggleProps {
   value: Source;
@@ -20,7 +20,7 @@ export function ImageSourceToggle({ value, onChange }: ImageSourceToggleProps) {
         className={cn("rounded-full", value === 'upload' && 'bg-white text-blue-700 shadow-sm')}
       >
         <Icons.UploadCloud className="mr-2 h-5 w-5" />
-        Upload Photo
+        Upload
       </Button>
       <Button
         onClick={() => onChange('camera')}
@@ -29,7 +29,16 @@ export function ImageSourceToggle({ value, onChange }: ImageSourceToggleProps) {
         className={cn("rounded-full", value === 'camera' && 'bg-white text-blue-700 shadow-sm')}
       >
         <Icons.Camera className="mr-2 h-5 w-5" />
-        Use Camera
+        Camera
+      </Button>
+      <Button
+        onClick={() => onChange('url')}
+        variant="ghost"
+        size="sm"
+        className={cn("rounded-full", value === 'url' && 'bg-white text-blue-700 shadow-sm')}
+      >
+        <Icons.Link className="mr-2 h-5 w-5" />
+        URL
       </Button>
     </div>
   );

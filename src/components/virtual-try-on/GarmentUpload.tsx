@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useTryOnStore } from '@/store/try-on-store';
 import { Icons } from '../icons';
@@ -7,10 +8,11 @@ import { vitonApi } from '@/services/viton-api';
 import { ImageSourceToggle } from './ImageSourceToggle';
 import { UploadView } from './UploadView';
 import { CameraView } from './CameraView';
+import { UrlView } from './UrlView';
 
 export function GarmentUpload() {
   const { modelImage, garmentImage, setGarmentImage, setAppState, setResultImages } = useTryOnStore();
-  const [source, setSource] = useState<'upload' | 'camera'>('upload');
+  const [source, setSource] = useState<'upload' | 'camera' | 'url'>('upload');
   const { toast } = useToast();
 
   const handleImageProvided = (dataUrl: string) => {
@@ -57,8 +59,10 @@ export function GarmentUpload() {
             <div className="w-64 h-80 rounded-3xl overflow-hidden bg-slate-200">
               {source === 'upload' ? (
                   <UploadView onUpload={handleImageProvided} title="Drop garment here" className="h-full" />
-              ) : (
+              ) : source === 'camera' ? (
                   <CameraView onCapture={handleImageProvided} onCameraError={() => setSource('upload')} />
+              ) : (
+                  <UrlView onUrlLoad={handleImageProvided} title="Enter garment URL" className="h-full" />
               )}
             </div>
         </div>
