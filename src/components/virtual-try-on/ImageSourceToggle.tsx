@@ -1,7 +1,6 @@
 
-import { useState, useEffect } from 'react';
-import { Slider } from '@/components/ui/slider';
-import { cn } from '@/lib/utils';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { Icons } from '@/components/icons';
 
 type Source = 'upload' | 'camera' | 'url';
 
@@ -10,37 +9,35 @@ interface ImageSourceToggleProps {
   onChange: (value: Source) => void;
 }
 
-const sourceOptions: Source[] = ['upload', 'camera', 'url'];
-
 export function ImageSourceToggle({ value, onChange }: ImageSourceToggleProps) {
-  const [sliderValue, setSliderValue] = useState<number>(sourceOptions.indexOf(value));
-
-  useEffect(() => {
-    // Update slider when value prop changes externally
-    setSliderValue(sourceOptions.indexOf(value));
-  }, [value]);
-
-  const handleSliderChange = (newValue: number[]) => {
-    const index = newValue[0];
-    const newSource = sourceOptions[index] as Source;
-    setSliderValue(index);
-    onChange(newSource);
-  };
-
   return (
-    <div className="w-full max-w-xs mx-auto">
-      <div className="flex justify-between mb-2 text-sm font-medium text-slate-600">
-        <span className={cn("transition-colors", value === 'upload' && "text-blue-700 font-bold")}>Upload</span>
-        <span className={cn("transition-colors", value === 'camera' && "text-blue-700 font-bold")}>Camera</span>
-        <span className={cn("transition-colors", value === 'url' && "text-blue-700 font-bold")}>URL</span>
-      </div>
-      <Slider
-        value={[sliderValue]}
-        max={2}
-        step={1}
-        onValueChange={handleSliderChange}
-        className="w-full"
-      />
-    </div>
+    <ToggleGroup
+      type="single"
+      value={value}
+      onValueChange={(newValue) => newValue && onChange(newValue as Source)}
+      className="grid grid-cols-3 gap-1 p-1 bg-slate-100 rounded-lg"
+    >
+      <ToggleGroupItem
+        value="upload"
+        className="flex flex-col items-center gap-1 p-3 data-[state=on]:bg-white data-[state=on]:text-blue-700 data-[state=on]:shadow-sm"
+      >
+        <Icons.UploadCloud className="h-5 w-5" />
+        <span className="text-xs font-medium">Upload</span>
+      </ToggleGroupItem>
+      <ToggleGroupItem
+        value="camera"
+        className="flex flex-col items-center gap-1 p-3 data-[state=on]:bg-white data-[state=on]:text-blue-700 data-[state=on]:shadow-sm"
+      >
+        <Icons.Camera className="h-5 w-5" />
+        <span className="text-xs font-medium">Camera</span>
+      </ToggleGroupItem>
+      <ToggleGroupItem
+        value="url"
+        className="flex flex-col items-center gap-1 p-3 data-[state=on]:bg-white data-[state=on]:text-blue-700 data-[state=on]:shadow-sm"
+      >
+        <Icons.Link className="h-5 w-5" />
+        <span className="text-xs font-medium">URL</span>
+      </ToggleGroupItem>
+    </ToggleGroup>
   );
 }
