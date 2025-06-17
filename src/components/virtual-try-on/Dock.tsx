@@ -10,7 +10,7 @@ const STEPS = [
 ];
 
 export function Dock() {
-  const { appState, modelImage, garmentImage, resultImages } = useTryOnStore();
+  const { appState, modelImage, garmentImage, resultImages, setAppState, setModelImage, setGarmentImage } = useTryOnStore();
 
   const isStepCompleted = (stepId: string) => {
     switch (stepId) {
@@ -22,6 +22,29 @@ export function Dock() {
         return resultImages.length > 0;
       default:
         return false;
+    }
+  };
+
+  const handleStepClick = (stepId: string) => {
+    // Don't allow navigation during loading
+    if (appState === 'LOADING') return;
+
+    switch (stepId) {
+      case 'MODEL_SELECTION':
+        setModelImage(null);
+        setAppState('MODEL_SELECTION');
+        break;
+      case 'GARMENT_UPLOAD':
+        if (modelImage) {
+          setGarmentImage(null);
+          setAppState('GARMENT_UPLOAD');
+        }
+        break;
+      case 'RESULT':
+        if (modelImage && garmentImage && resultImages.length > 0) {
+          setAppState('RESULT');
+        }
+        break;
     }
   };
 
@@ -37,20 +60,32 @@ export function Dock() {
             appState === 'LOADING'
               ? index === resultStepIndex
               : activeStepIndex === index;
+          
+          // Determine if step is clickable
+          const isClickable = () => {
+            if (appState === 'LOADING') return false;
+            if (step.id === 'MODEL_SELECTION') return true;
+            if (step.id === 'GARMENT_UPLOAD') return !!modelImage;
+            if (step.id === 'RESULT') return isCompleted;
+            return false;
+          };
 
           return (
-            <div
+            <button
               key={step.id}
+              onClick={() => handleStepClick(step.id)}
+              disabled={!isClickable()}
               className={cn(
                 "flex items-center justify-center rounded-full text-sm font-medium transition-all duration-300",
                 "h-10 w-10 md:w-auto md:px-4 md:py-2 md:gap-2",
                 isCompleted ? "bg-blue-600 text-white" : "text-slate-600",
-                isActive && "bg-blue-700 text-white shadow-sm ring-2 ring-white/50"
+                isActive && "bg-blue-700 text-white shadow-sm ring-2 ring-white/50",
+                isClickable() ? "hover:bg-blue-500 hover:text-white cursor-pointer" : "cursor-not-allowed opacity-50"
               )}
             >
               <step.icon className="h-5 w-5 shrink-0" />
               <span className="hidden md:inline">{step.name}</span>
-            </div>
+            </button>
           );
         })}
       </div>
