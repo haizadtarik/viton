@@ -3,7 +3,7 @@ import React from 'react';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { Icons } from '@/components/icons';
 import { cn } from '@/lib/utils';
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 
 type Source = 'upload' | 'camera' | 'url';
 
@@ -14,13 +14,41 @@ interface ImageSourceToggleProps {
 
 export function ImageSourceToggle({ value, onChange }: ImageSourceToggleProps) {
   const [isDragging, setIsDragging] = useState(false);
+  const [indicatorStyle, setIndicatorStyle] = useState<React.CSSProperties>({});
+  const [isAnimating, setIsAnimating] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
+  const buttonsRef = useRef<(HTMLButtonElement | null)[]>([]);
 
   const options: { value: Source; icon: any; label: string }[] = [
     { value: 'upload', icon: Icons.UploadCloud, label: 'Upload' },
     { value: 'camera', icon: Icons.Camera, label: 'Camera' },
     { value: 'url', icon: Icons.Link, label: 'URL' }
   ];
+
+  // Update indicator position when value changes
+  useEffect(() => {
+    updateIndicatorPosition();
+  }, [value]);
+
+  const updateIndicatorPosition = () => {
+    const activeIndex = options.findIndex(opt => opt.value === value);
+    const activeButton = buttonsRef.current[activeIndex];
+    
+    if (activeButton && containerRef.current) {
+      const containerRect = containerRef.current.getBoundingClientRect();
+      const buttonRect = activeButton.getBoundingClientRect();
+      
+      const left = buttonRect.left - containerRect.left;
+      const width = buttonRect.width;
+      
+      setIndicatorStyle({
+        left: `${left}px`,
+        width: `${width + 16}px`, // Oversized
+        height: `${buttonRect.height + 8}px`, // Oversized
+        top: `${-4}px`, // Center it
+      });
+    }
+  };
 
   const handleMouseDown = (e: React.MouseEvent) => {
     setIsDragging(true);
@@ -44,7 +72,9 @@ export function ImageSourceToggle({ value, onChange }: ImageSourceToggleProps) {
     }
     
     if (newValue !== value) {
+      setIsAnimating(true);
       onChange(newValue);
+      setTimeout(() => setIsAnimating(false), 300);
     }
   };
 
@@ -55,6 +85,14 @@ export function ImageSourceToggle({ value, onChange }: ImageSourceToggleProps) {
   const handleMouseMoveGlobal = (e: MouseEvent) => {
     if (isDragging) {
       handleMouseMove(e);
+    }
+  };
+
+  const handleButtonClick = (optionValue: Source) => {
+    if (optionValue !== value) {
+      setIsAnimating(true);
+      onChange(optionValue);
+      setTimeout(() => setIsAnimating(false), 300);
     }
   };
 
@@ -70,26 +108,57 @@ export function ImageSourceToggle({ value, onChange }: ImageSourceToggleProps) {
     }
   }, [isDragging]);
 
+  // Update indicator on resize
+  useEffect(() => {
+    const handleResize = () => updateIndicatorPosition();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   return (
     <div 
       ref={containerRef}
-      className="frosted-glass flex items-center gap-2 rounded-full border border-white/30 p-2 shadow-lg select-none"
+      className="frosted-glass relative flex items-center gap-2 rounded-full border border-white/30 p-2 shadow-lg select-none overflow-hidden"
       onMouseDown={handleMouseDown}
     >
-      {options.map(({ value: optionValue, icon: Icon, label }) => (
+      {/* Sliding Background Indicator */}
+      <div
+        className={cn(
+          "absolute rounded-full transition-all duration-500 ease-out pointer-events-none",
+          "bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700",
+          "shadow-lg shadow-blue-500/50",
+          isAnimating && "animate-glow",
+          isDragging && "animate-magnetic-snap"
+        )}
+        style={indicatorStyle}
+      />
+      
+      {options.map(({ value: optionValue, icon: Icon, label }, index) => (
         <button
           key={optionValue}
-          onClick={() => onChange(optionValue)}
+          ref={(el) => (buttonsRef.current[index] = el)}
+          onClick={() => handleButtonClick(optionValue)}
           className={cn(
-            "flex items-center justify-center rounded-full text-sm font-medium transition-all duration-300",
+            "relative flex items-center justify-center rounded-full text-sm font-medium transition-all duration-300 z-10",
             "h-10 w-auto px-4 py-2 gap-2",
             value === optionValue 
-              ? "bg-blue-600 text-white shadow-sm ring-2 ring-white/50" 
-              : "text-slate-600 hover:bg-blue-500 hover:text-white cursor-pointer"
+              ? cn(
+                  "text-white transform scale-110",
+                  isAnimating && "animate-bounce-in"
+                )
+              : "text-slate-600 hover:text-slate-800 cursor-pointer hover:scale-105"
           )}
         >
-          <Icon className="h-5 w-5 shrink-0" />
-          <span>{label}</span>
+          <Icon className={cn(
+            "h-5 w-5 shrink-0 transition-all duration-300",
+            value === optionValue && "drop-shadow-lg"
+          )} />
+          <span className={cn(
+            "transition-all duration-300",
+            value === optionValue && "font-semibold tracking-wide"
+          )}>
+            {label}
+          </span>
         </button>
       ))}
     </div>
