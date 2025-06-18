@@ -1,6 +1,7 @@
 
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { Icons } from '@/components/icons';
+import { cn } from '@/lib/utils';
 
 type Source = 'upload' | 'camera' | 'url';
 
@@ -11,33 +12,48 @@ interface ImageSourceToggleProps {
 
 export function ImageSourceToggle({ value, onChange }: ImageSourceToggleProps) {
   return (
-    <ToggleGroup
-      type="single"
-      value={value}
-      onValueChange={(newValue) => newValue && onChange(newValue as Source)}
-      className="grid grid-cols-3 gap-1 p-1 bg-slate-100 rounded-lg"
-    >
-      <ToggleGroupItem
-        value="upload"
-        className="flex flex-col items-center gap-1 p-3 data-[state=on]:bg-white data-[state=on]:text-blue-700 data-[state=on]:shadow-sm"
+    <div className="frosted-glass flex items-center gap-2 rounded-full border border-white/30 p-2 shadow-lg">
+      <button
+        onClick={() => onChange('upload')}
+        className={cn(
+          "flex items-center justify-center rounded-full text-sm font-medium transition-all duration-300",
+          "h-10 w-auto px-4 py-2 gap-2",
+          value === 'upload' 
+            ? "bg-blue-600 text-white shadow-sm ring-2 ring-white/50" 
+            : "text-slate-600 hover:bg-blue-500 hover:text-white cursor-pointer"
+        )}
       >
-        <Icons.UploadCloud className="h-5 w-5" />
-        <span className="text-xs font-medium">Upload</span>
-      </ToggleGroupItem>
-      <ToggleGroupItem
-        value="camera"
-        className="flex flex-col items-center gap-1 p-3 data-[state=on]:bg-white data-[state=on]:text-blue-700 data-[state=on]:shadow-sm"
+        <Icons.UploadCloud className="h-5 w-5 shrink-0" />
+        <span>Upload</span>
+      </button>
+      
+      <button
+        onClick={() => onChange('camera')}
+        className={cn(
+          "flex items-center justify-center rounded-full text-sm font-medium transition-all duration-300",
+          "h-10 w-auto px-4 py-2 gap-2",
+          value === 'camera' 
+            ? "bg-blue-600 text-white shadow-sm ring-2 ring-white/50" 
+            : "text-slate-600 hover:bg-blue-500 hover:text-white cursor-pointer"
+        )}
       >
-        <Icons.Camera className="h-5 w-5" />
-        <span className="text-xs font-medium">Camera</span>
-      </ToggleGroupItem>
-      <ToggleGroupItem
-        value="url"
-        className="flex flex-col items-center gap-1 p-3 data-[state=on]:bg-white data-[state=on]:text-blue-700 data-[state=on]:shadow-sm"
+        <Icons.Camera className="h-5 w-5 shrink-0" />
+        <span>Camera</span>
+      </button>
+      
+      <button
+        onClick={() => onChange('url')}
+        className={cn(
+          "flex items-center justify-center rounded-full text-sm font-medium transition-all duration-300",
+          "h-10 w-auto px-4 py-2 gap-2",
+          value === 'url' 
+            ? "bg-blue-600 text-white shadow-sm ring-2 ring-white/50" 
+            : "text-slate-600 hover:bg-blue-500 hover:text-white cursor-pointer"
+        )}
       >
-        <Icons.Link className="h-5 w-5" />
-        <span className="text-xs font-medium">URL</span>
-      </ToggleGroupItem>
-    </ToggleGroup>
+        <Icons.Link className="h-5 w-5 shrink-0" />
+        <span>URL</span>
+      </button>
+    </div>
   );
 }
