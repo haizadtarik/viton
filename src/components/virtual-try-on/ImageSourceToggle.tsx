@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Icons } from '@/components/icons';
 import { cn } from '@/lib/utils';
@@ -43,12 +44,13 @@ export function ImageSourceToggle({ value, onChange }: ImageSourceToggleProps) {
       const width = buttonRect.width;
       const height = buttonRect.height;
       
-      // Make the indicator oversized
+      // Always make the indicator oversized - consistent sizing
+      const oversizeAmount = 8;
       setIndicatorStyle({
-        left: `${left - 8}px`, // Extend 8px to the left
-        width: `${width + 16}px`, // Add 16px total width (8px on each side)
-        height: `${height + 8}px`, // Add 8px total height
-        top: `-4px`, // Move up 4px to center vertically
+        left: `${left - oversizeAmount}px`,
+        width: `${width + (oversizeAmount * 2)}px`,
+        height: `${height + oversizeAmount}px`,
+        top: `${-oversizeAmount / 2}px`,
       });
     }
   };
@@ -78,7 +80,8 @@ export function ImageSourceToggle({ value, onChange }: ImageSourceToggleProps) {
     if (newValue !== value) {
       setIsAnimating(true);
       onChange(newValue);
-      setTimeout(() => setIsAnimating(false), 600);
+      // Don't reset animation state immediately, let it complete
+      setTimeout(() => setIsAnimating(false), 300);
     }
   };
 
@@ -96,7 +99,7 @@ export function ImageSourceToggle({ value, onChange }: ImageSourceToggleProps) {
     if (optionValue !== value) {
       setIsAnimating(true);
       onChange(optionValue);
-      setTimeout(() => setIsAnimating(false), 600);
+      setTimeout(() => setIsAnimating(false), 300);
     }
   };
 
@@ -138,11 +141,10 @@ export function ImageSourceToggle({ value, onChange }: ImageSourceToggleProps) {
       {/* Sliding Background Indicator */}
       <div
         className={cn(
-          "absolute rounded-full transition-all duration-500 ease-out pointer-events-none z-0",
+          "absolute rounded-full transition-all duration-300 ease-out pointer-events-none z-0",
           "bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700",
           "shadow-lg shadow-blue-500/50",
-          isAnimating && "animate-glow",
-          isDragging && "animate-magnetic-snap"
+          isAnimating && "animate-glow"
         )}
         style={indicatorStyle}
       />
