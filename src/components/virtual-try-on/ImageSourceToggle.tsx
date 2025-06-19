@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Icons } from '@/components/icons';
 import { cn } from '@/lib/utils';
@@ -28,7 +27,7 @@ export function ImageSourceToggle({ value, onChange }: ImageSourceToggleProps) {
   useEffect(() => {
     const timer = setTimeout(() => {
       updateIndicatorPosition();
-    }, 50); // Small delay to ensure DOM is ready
+    }, 50);
     return () => clearTimeout(timer);
   }, [value]);
 
@@ -42,12 +41,13 @@ export function ImageSourceToggle({ value, onChange }: ImageSourceToggleProps) {
       
       const left = buttonRect.left - containerRect.left;
       const width = buttonRect.width;
+      const height = buttonRect.height;
       
       setIndicatorStyle({
-        left: `${left - 8}px`, // Oversized by 8px on each side
-        width: `${width + 16}px`, // Oversized
-        height: `${buttonRect.height + 8}px`, // Oversized
-        top: `-4px`, // Center vertically
+        left: `${left}px`,
+        width: `${width}px`,
+        height: `${height}px`,
+        top: `0px`,
       });
     }
   };
@@ -131,7 +131,7 @@ export function ImageSourceToggle({ value, onChange }: ImageSourceToggleProps) {
   return (
     <div 
       ref={containerRef}
-      className="frosted-glass relative flex items-center gap-2 rounded-full border border-white/30 p-2 shadow-lg select-none overflow-hidden"
+      className="frosted-glass relative flex items-center rounded-full border border-white/30 p-1 shadow-lg select-none overflow-hidden"
       onMouseDown={handleMouseDown}
     >
       {/* Sliding Background Indicator */}
@@ -153,10 +153,10 @@ export function ImageSourceToggle({ value, onChange }: ImageSourceToggleProps) {
           onClick={() => handleButtonClick(optionValue)}
           className={cn(
             "relative flex items-center justify-center rounded-full text-sm font-medium transition-all duration-300 z-10",
-            "h-10 w-auto px-4 py-2 gap-2",
+            "h-12 px-6 py-3 gap-2 min-w-[100px]",
             value === optionValue 
               ? cn(
-                  "text-white transform scale-110",
+                  "text-white transform scale-105",
                   isAnimating && "animate-bounce-in"
                 )
               : "text-slate-600 hover:text-slate-800 cursor-pointer hover:scale-105"
@@ -167,7 +167,7 @@ export function ImageSourceToggle({ value, onChange }: ImageSourceToggleProps) {
             value === optionValue && "drop-shadow-lg"
           )} />
           <span className={cn(
-            "transition-all duration-300",
+            "transition-all duration-300 whitespace-nowrap",
             value === optionValue && "font-semibold tracking-wide"
           )}>
             {label}
