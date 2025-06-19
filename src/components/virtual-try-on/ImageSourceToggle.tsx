@@ -43,11 +43,12 @@ export function ImageSourceToggle({ value, onChange }: ImageSourceToggleProps) {
       const width = buttonRect.width;
       const height = buttonRect.height;
       
+      // Make the indicator oversized
       setIndicatorStyle({
-        left: `${left}px`,
-        width: `${width}px`,
-        height: `${height}px`,
-        top: `0px`,
+        left: `${left - 8}px`, // Extend 8px to the left
+        width: `${width + 16}px`, // Add 16px total width (8px on each side)
+        height: `${height + 8}px`, // Add 8px total height
+        top: `-4px`, // Move up 4px to center vertically
       });
     }
   };
@@ -131,7 +132,7 @@ export function ImageSourceToggle({ value, onChange }: ImageSourceToggleProps) {
   return (
     <div 
       ref={containerRef}
-      className="frosted-glass relative flex items-center rounded-full border border-white/30 p-1 shadow-lg select-none overflow-hidden"
+      className="frosted-glass relative flex items-center rounded-full border border-white/30 p-1 shadow-lg select-none overflow-visible"
       onMouseDown={handleMouseDown}
     >
       {/* Sliding Background Indicator */}
