@@ -1,6 +1,5 @@
 
 import React from 'react';
-import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { Icons } from '@/components/icons';
 import { cn } from '@/lib/utils';
 import { useState, useRef, useEffect } from 'react';
@@ -27,7 +26,10 @@ export function ImageSourceToggle({ value, onChange }: ImageSourceToggleProps) {
 
   // Update indicator position when value changes
   useEffect(() => {
-    updateIndicatorPosition();
+    const timer = setTimeout(() => {
+      updateIndicatorPosition();
+    }, 50); // Small delay to ensure DOM is ready
+    return () => clearTimeout(timer);
   }, [value]);
 
   const updateIndicatorPosition = () => {
@@ -42,15 +44,16 @@ export function ImageSourceToggle({ value, onChange }: ImageSourceToggleProps) {
       const width = buttonRect.width;
       
       setIndicatorStyle({
-        left: `${left}px`,
+        left: `${left - 8}px`, // Oversized by 8px on each side
         width: `${width + 16}px`, // Oversized
         height: `${buttonRect.height + 8}px`, // Oversized
-        top: `${-4}px`, // Center it
+        top: `-4px`, // Center vertically
       });
     }
   };
 
   const handleMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault();
     setIsDragging(true);
     handleMouseMove(e);
   };
@@ -74,7 +77,7 @@ export function ImageSourceToggle({ value, onChange }: ImageSourceToggleProps) {
     if (newValue !== value) {
       setIsAnimating(true);
       onChange(newValue);
-      setTimeout(() => setIsAnimating(false), 300);
+      setTimeout(() => setIsAnimating(false), 600);
     }
   };
 
@@ -92,12 +95,12 @@ export function ImageSourceToggle({ value, onChange }: ImageSourceToggleProps) {
     if (optionValue !== value) {
       setIsAnimating(true);
       onChange(optionValue);
-      setTimeout(() => setIsAnimating(false), 300);
+      setTimeout(() => setIsAnimating(false), 600);
     }
   };
 
   // Add global mouse event listeners
-  React.useEffect(() => {
+  useEffect(() => {
     if (isDragging) {
       document.addEventListener('mousemove', handleMouseMoveGlobal);
       document.addEventListener('mouseup', handleMouseUp);
@@ -110,9 +113,19 @@ export function ImageSourceToggle({ value, onChange }: ImageSourceToggleProps) {
 
   // Update indicator on resize
   useEffect(() => {
-    const handleResize = () => updateIndicatorPosition();
+    const handleResize = () => {
+      setTimeout(() => updateIndicatorPosition(), 100);
+    };
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // Initial position setup
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      updateIndicatorPosition();
+    }, 100);
+    return () => clearTimeout(timer);
   }, []);
 
   return (
@@ -124,7 +137,7 @@ export function ImageSourceToggle({ value, onChange }: ImageSourceToggleProps) {
       {/* Sliding Background Indicator */}
       <div
         className={cn(
-          "absolute rounded-full transition-all duration-500 ease-out pointer-events-none",
+          "absolute rounded-full transition-all duration-500 ease-out pointer-events-none z-0",
           "bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700",
           "shadow-lg shadow-blue-500/50",
           isAnimating && "animate-glow",
