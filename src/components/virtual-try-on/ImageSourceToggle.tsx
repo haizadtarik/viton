@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Icons } from '@/components/icons';
 import { cn } from '@/lib/utils';
@@ -40,16 +41,16 @@ export function ImageSourceToggle({ value, onChange }: ImageSourceToggleProps) {
       const buttonRect = activeButton.getBoundingClientRect();
       
       const left = buttonRect.left - containerRect.left;
+      const buttonWidth = buttonRect.width;
+      const buttonHeight = buttonRect.height;
       
-      // Fixed oversized dimensions - don't calculate based on button size
+      // Apply oversized effect to actual button dimensions
       const oversizeAmount = 8;
-      const baseWidth = 100; // Minimum width that covers the button content
-      const baseHeight = 48; // Fixed height matching button height
       
       setIndicatorStyle({
         left: `${left - oversizeAmount}px`,
-        width: `${baseWidth + (oversizeAmount * 2)}px`,
-        height: `${baseHeight + oversizeAmount}px`,
+        width: `${buttonWidth + (oversizeAmount * 2)}px`,
+        height: `${buttonHeight + oversizeAmount}px`,
         top: `${-oversizeAmount / 2}px`,
       });
     }
