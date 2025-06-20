@@ -40,18 +40,25 @@ export function ImageSourceToggle({ value, onChange }: ImageSourceToggleProps) {
       const containerRect = containerRef.current.getBoundingClientRect();
       const buttonRect = activeButton.getBoundingClientRect();
       
-      const left = buttonRect.left - containerRect.left;
+      // Calculate button dimensions
+      const buttonWidth = buttonRect.width;
+      const buttonHeight = buttonRect.height;
+      const buttonLeft = buttonRect.left - containerRect.left;
       
-      // Use fixed dimensions that match our button design
+      // Apply oversized effect symmetrically
       const oversizeAmount = 8;
-      const fixedWidth = 116; // Fixed width that accommodates all button content
-      const fixedHeight = 56; // Fixed height that's larger than button height
+      const indicatorWidth = buttonWidth + (oversizeAmount * 2);
+      const indicatorHeight = buttonHeight + oversizeAmount;
+      
+      // Center the indicator over the button
+      const indicatorLeft = buttonLeft - oversizeAmount;
+      const indicatorTop = -oversizeAmount / 2;
       
       setIndicatorStyle({
-        left: `${left - oversizeAmount}px`,
-        width: `${fixedWidth}px`,
-        height: `${fixedHeight}px`,
-        top: `${-oversizeAmount / 2}px`,
+        left: `${indicatorLeft}px`,
+        width: `${indicatorWidth}px`,
+        height: `${indicatorHeight}px`,
+        top: `${indicatorTop}px`,
       });
     }
   };
