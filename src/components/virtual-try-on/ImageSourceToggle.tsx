@@ -13,7 +13,6 @@ interface ImageSourceToggleProps {
 
 export function ImageSourceToggle({ value, onChange }: ImageSourceToggleProps) {
   const [isDragging, setIsDragging] = useState(false);
-  const [indicatorStyle, setIndicatorStyle] = useState<React.CSSProperties>({});
   const [isAnimating, setIsAnimating] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
   const buttonsRef = useRef<(HTMLButtonElement | null)[]>([]);
@@ -24,44 +23,8 @@ export function ImageSourceToggle({ value, onChange }: ImageSourceToggleProps) {
     { value: 'url', icon: Icons.Link, label: 'URL' }
   ];
 
-  // Update indicator position when value changes
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      updateIndicatorPosition();
-    }, 50);
-    return () => clearTimeout(timer);
-  }, [value]);
-
-  const updateIndicatorPosition = () => {
-    const activeIndex = options.findIndex(opt => opt.value === value);
-    const activeButton = buttonsRef.current[activeIndex];
-    
-    if (activeButton && containerRef.current) {
-      const containerRect = containerRef.current.getBoundingClientRect();
-      const buttonRect = activeButton.getBoundingClientRect();
-      
-      // Calculate button dimensions
-      const buttonWidth = buttonRect.width;
-      const buttonHeight = buttonRect.height;
-      const buttonLeft = buttonRect.left - containerRect.left;
-      
-      // Apply oversized effect symmetrically
-      const oversizeAmount = 8;
-      const indicatorWidth = buttonWidth + (oversizeAmount * 2);
-      const indicatorHeight = buttonHeight + oversizeAmount;
-      
-      // Center the indicator over the button
-      const indicatorLeft = buttonLeft - oversizeAmount;
-      const indicatorTop = -oversizeAmount / 2;
-      
-      setIndicatorStyle({
-        left: `${indicatorLeft}px`,
-        width: `${indicatorWidth}px`,
-        height: `${indicatorHeight}px`,
-        top: `${indicatorTop}px`,
-      });
-    }
-  };
+  // Get the active button index for transform-based positioning
+  const activeIndex = options.findIndex(opt => opt.value === value);
 
   const handleMouseDown = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -88,7 +51,6 @@ export function ImageSourceToggle({ value, onChange }: ImageSourceToggleProps) {
     if (newValue !== value) {
       setIsAnimating(true);
       onChange(newValue);
-      // Don't reset animation state immediately, let it complete
       setTimeout(() => setIsAnimating(false), 300);
     }
   };
@@ -123,30 +85,13 @@ export function ImageSourceToggle({ value, onChange }: ImageSourceToggleProps) {
     }
   }, [isDragging]);
 
-  // Update indicator on resize
-  useEffect(() => {
-    const handleResize = () => {
-      setTimeout(() => updateIndicatorPosition(), 100);
-    };
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  // Initial position setup
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      updateIndicatorPosition();
-    }, 100);
-    return () => clearTimeout(timer);
-  }, []);
-
   return (
     <div 
       ref={containerRef}
       className="frosted-glass relative flex items-center rounded-full border border-white/30 p-1 shadow-lg select-none overflow-visible"
       onMouseDown={handleMouseDown}
     >
-      {/* Sliding Background Indicator */}
+      {/* Sliding Background Indicator - using transform instead of left positioning */}
       <div
         className={cn(
           "absolute rounded-full transition-all duration-300 ease-out pointer-events-none z-0",
@@ -154,7 +99,14 @@ export function ImageSourceToggle({ value, onChange }: ImageSourceToggleProps) {
           "shadow-lg shadow-blue-500/50",
           isAnimating && "animate-glow"
         )}
-        style={indicatorStyle}
+        style={{
+          // Index-based positioning immune to scrolling
+          transform: `translateX(${activeIndex * 100}%)`,
+          width: 'calc(33.333% + 16px)', // 1/3 width + oversize
+          height: 'calc(100% + 8px)', // full height + oversize
+          left: '-8px', // center the oversize effect
+          top: '-4px', // center the oversize effect vertically
+        }}
       />
       
       {options.map(({ value: optionValue, icon: Icon, label }, index) => (
@@ -164,7 +116,7 @@ export function ImageSourceToggle({ value, onChange }: ImageSourceToggleProps) {
           onClick={() => handleButtonClick(optionValue)}
           className={cn(
             "relative flex items-center justify-center rounded-full text-sm font-medium transition-all duration-300 z-10",
-            "h-12 px-6 py-3 gap-2 min-w-[100px]",
+            "h-12 px-6 py-3 gap-2 min-w-[100px] flex-1",
             value === optionValue 
               ? cn(
                   "text-white transform scale-105",
