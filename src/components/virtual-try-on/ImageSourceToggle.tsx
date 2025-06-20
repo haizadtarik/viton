@@ -41,16 +41,16 @@ export function ImageSourceToggle({ value, onChange }: ImageSourceToggleProps) {
       const buttonRect = activeButton.getBoundingClientRect();
       
       const left = buttonRect.left - containerRect.left;
-      const buttonWidth = buttonRect.width;
-      const buttonHeight = buttonRect.height;
       
-      // Apply oversized effect to actual button dimensions
+      // Use fixed dimensions that match our button design
       const oversizeAmount = 8;
+      const fixedWidth = 116; // Fixed width that accommodates all button content
+      const fixedHeight = 56; // Fixed height that's larger than button height
       
       setIndicatorStyle({
         left: `${left - oversizeAmount}px`,
-        width: `${buttonWidth + (oversizeAmount * 2)}px`,
-        height: `${buttonHeight + oversizeAmount}px`,
+        width: `${fixedWidth}px`,
+        height: `${fixedHeight}px`,
         top: `${-oversizeAmount / 2}px`,
       });
     }
