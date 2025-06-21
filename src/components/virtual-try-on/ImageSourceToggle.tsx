@@ -1,7 +1,8 @@
+
 import React from 'react';
 import { Icons } from '@/components/icons';
 import { cn } from '@/lib/utils';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useLayoutEffect } from 'react';
 
 type Source = 'upload' | 'camera' | 'url';
 
@@ -13,6 +14,7 @@ interface ImageSourceToggleProps {
 export function ImageSourceToggle({ value, onChange }: ImageSourceToggleProps) {
   const [isDragging, setIsDragging] = useState(false);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [indicatorStyle, setIndicatorStyle] = useState<React.CSSProperties>({});
   const containerRef = useRef<HTMLDivElement>(null);
   const buttonsRef = useRef<(HTMLButtonElement | null)[]>([]);
 
@@ -22,8 +24,57 @@ export function ImageSourceToggle({ value, onChange }: ImageSourceToggleProps) {
     { value: 'url', icon: Icons.Link, label: 'URL' }
   ];
 
-  // Get the active button index for transform-based positioning
+  // Get the active button index
   const activeIndex = options.findIndex(opt => opt.value === value);
+
+  // Update indicator position using precise measurements
+  const updateIndicatorPosition = () => {
+    if (!containerRef.current || activeIndex === -1) return;
+    
+    const activeButton = buttonsRef.current[activeIndex];
+    if (!activeButton) return;
+
+    // Get container bounds
+    const containerRect = containerRef.current.getBoundingClientRect();
+    const buttonRect = activeButton.getBoundingClientRect();
+    
+    // Calculate relative position within container
+    const relativeLeft = buttonRect.left - containerRect.left;
+    const buttonCenter = relativeLeft + (buttonRect.width / 2);
+    
+    // Oversize amounts
+    const oversizeWidth = 16; // 8px on each side
+    const oversizeHeight = 8; // 4px on each side
+    
+    // Calculate indicator dimensions and position
+    const indicatorWidth = buttonRect.width + oversizeWidth;
+    const indicatorHeight = buttonRect.height + oversizeHeight;
+    const indicatorLeft = buttonCenter - (indicatorWidth / 2);
+    
+    setIndicatorStyle({
+      left: `${indicatorLeft}px`,
+      width: `${indicatorWidth}px`,
+      height: `${indicatorHeight}px`,
+      top: `${-oversizeHeight / 2}px`,
+    });
+  };
+
+  // Update position when active value changes
+  useLayoutEffect(() => {
+    // Small delay to ensure DOM is fully updated
+    const timer = setTimeout(updateIndicatorPosition, 10);
+    return () => clearTimeout(timer);
+  }, [value, activeIndex]);
+
+  // Handle window resize
+  useEffect(() => {
+    const handleResize = () => {
+      updateIndicatorPosition();
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [activeIndex]);
 
   const handleMouseDown = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -90,7 +141,7 @@ export function ImageSourceToggle({ value, onChange }: ImageSourceToggleProps) {
       className="frosted-glass relative flex items-center rounded-full border border-white/30 p-1 shadow-lg select-none overflow-visible"
       onMouseDown={handleMouseDown}
     >
-      {/* Sliding Background Indicator - using corrected transform positioning */}
+      {/* Sliding Background Indicator - using precise pixel positioning */}
       <div
         className={cn(
           "absolute rounded-full transition-all duration-300 ease-out pointer-events-none z-0",
@@ -98,15 +149,7 @@ export function ImageSourceToggle({ value, onChange }: ImageSourceToggleProps) {
           "shadow-lg shadow-blue-500/50",
           isAnimating && "animate-glow"
         )}
-        style={{
-          // Corrected positioning: each button takes 1/3 of container width
-          // The indicator needs to move by exactly 1/3 of the container width for each step
-          transform: `translateX(${activeIndex * (100 / 3)}%)`,
-          width: 'calc(33.333% + 16px)', // 1/3 width + oversize
-          height: 'calc(100% + 8px)', // full height + oversize
-          left: '-8px', // center the oversize effect
-          top: '-4px', // center the oversize effect vertically
-        }}
+        style={indicatorStyle}
       />
       
       {options.map(({ value: optionValue, icon: Icon, label }, index) => (
