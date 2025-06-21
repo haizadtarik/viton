@@ -1,4 +1,5 @@
 
+
 import React from 'react';
 import { Icons } from '@/components/icons';
 import { cn } from '@/lib/utils';
@@ -16,7 +17,6 @@ export function ImageSourceToggle({ value, onChange }: ImageSourceToggleProps) {
   const [isAnimating, setIsAnimating] = useState(false);
   const [indicatorStyle, setIndicatorStyle] = useState<React.CSSProperties>({});
   const containerRef = useRef<HTMLDivElement>(null);
-  const buttonsRef = useRef<(HTMLButtonElement | null)[]>([]);
 
   const options: { value: Source; icon: any; label: string }[] = [
     { value: 'upload', icon: Icons.UploadCloud, label: 'Upload' },
@@ -27,43 +27,51 @@ export function ImageSourceToggle({ value, onChange }: ImageSourceToggleProps) {
   // Get the active button index
   const activeIndex = options.findIndex(opt => opt.value === value);
 
-  // Update indicator position using precise measurements
+  // Calculate indicator position using container-relative math
   const updateIndicatorPosition = () => {
     if (!containerRef.current || activeIndex === -1) return;
     
-    const activeButton = buttonsRef.current[activeIndex];
-    if (!activeButton) return;
-
-    // Get container bounds
-    const containerRect = containerRef.current.getBoundingClientRect();
-    const buttonRect = activeButton.getBoundingClientRect();
+    // Get container dimensions
+    const container = containerRef.current;
+    const containerStyle = window.getComputedStyle(container);
     
-    // Calculate relative position within container
-    const relativeLeft = buttonRect.left - containerRect.left;
-    const buttonCenter = relativeLeft + (buttonRect.width / 2);
+    // Parse padding (p-1 = 4px in Tailwind)
+    const paddingLeft = parseFloat(containerStyle.paddingLeft) || 4;
+    const paddingTop = parseFloat(containerStyle.paddingTop) || 4;
+    
+    // Calculate the inner content area (excluding padding)
+    const innerWidth = container.offsetWidth - (paddingLeft * 2);
+    const innerHeight = container.offsetHeight - (paddingTop * 2);
+    
+    // Each button takes exactly 1/3 of the inner width (flex-1)
+    const buttonWidth = innerWidth / 3;
+    
+    // Calculate the center of the active button
+    const buttonCenterX = (activeIndex * buttonWidth) + (buttonWidth / 2);
     
     // Oversize amounts
     const oversizeWidth = 16; // 8px on each side
     const oversizeHeight = 8; // 4px on each side
     
     // Calculate indicator dimensions and position
-    const indicatorWidth = buttonRect.width + oversizeWidth;
-    const indicatorHeight = buttonRect.height + oversizeHeight;
-    const indicatorLeft = buttonCenter - (indicatorWidth / 2);
+    const indicatorWidth = buttonWidth + oversizeWidth;
+    const indicatorHeight = innerHeight + oversizeHeight;
+    
+    // Position indicator centered on the button (relative to container's padding edge)
+    const indicatorLeft = paddingLeft + buttonCenterX - (indicatorWidth / 2);
+    const indicatorTop = paddingTop - (oversizeHeight / 2);
     
     setIndicatorStyle({
       left: `${indicatorLeft}px`,
+      top: `${indicatorTop}px`,
       width: `${indicatorWidth}px`,
       height: `${indicatorHeight}px`,
-      top: `${-oversizeHeight / 2}px`,
     });
   };
 
   // Update position when active value changes
   useLayoutEffect(() => {
-    // Small delay to ensure DOM is fully updated
-    const timer = setTimeout(updateIndicatorPosition, 10);
-    return () => clearTimeout(timer);
+    updateIndicatorPosition();
   }, [value, activeIndex]);
 
   // Handle window resize
@@ -141,7 +149,7 @@ export function ImageSourceToggle({ value, onChange }: ImageSourceToggleProps) {
       className="frosted-glass relative flex items-center rounded-full border border-white/30 p-1 shadow-lg select-none overflow-visible"
       onMouseDown={handleMouseDown}
     >
-      {/* Sliding Background Indicator - using precise pixel positioning */}
+      {/* Sliding Background Indicator - using mathematical container-relative positioning */}
       <div
         className={cn(
           "absolute rounded-full transition-all duration-300 ease-out pointer-events-none z-0",
@@ -155,7 +163,6 @@ export function ImageSourceToggle({ value, onChange }: ImageSourceToggleProps) {
       {options.map(({ value: optionValue, icon: Icon, label }, index) => (
         <button
           key={optionValue}
-          ref={(el) => (buttonsRef.current[index] = el)}
           onClick={() => handleButtonClick(optionValue)}
           className={cn(
             "relative flex items-center justify-center rounded-full text-sm font-medium transition-all duration-300 z-10",
@@ -183,3 +190,4 @@ export function ImageSourceToggle({ value, onChange }: ImageSourceToggleProps) {
     </div>
   );
 }
+
