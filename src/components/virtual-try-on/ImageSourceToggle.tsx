@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Icons } from '@/components/icons';
 import { cn } from '@/lib/utils';
@@ -91,7 +90,7 @@ export function ImageSourceToggle({ value, onChange }: ImageSourceToggleProps) {
       className="frosted-glass relative flex items-center rounded-full border border-white/30 p-1 shadow-lg select-none overflow-visible"
       onMouseDown={handleMouseDown}
     >
-      {/* Sliding Background Indicator - using transform instead of left positioning */}
+      {/* Sliding Background Indicator - using corrected transform positioning */}
       <div
         className={cn(
           "absolute rounded-full transition-all duration-300 ease-out pointer-events-none z-0",
@@ -100,8 +99,9 @@ export function ImageSourceToggle({ value, onChange }: ImageSourceToggleProps) {
           isAnimating && "animate-glow"
         )}
         style={{
-          // Index-based positioning immune to scrolling
-          transform: `translateX(${activeIndex * 100}%)`,
+          // Corrected positioning: each button takes 1/3 of container width
+          // The indicator needs to move by exactly 1/3 of the container width for each step
+          transform: `translateX(${activeIndex * (100 / 3)}%)`,
           width: 'calc(33.333% + 16px)', // 1/3 width + oversize
           height: 'calc(100% + 8px)', // full height + oversize
           left: '-8px', // center the oversize effect
