@@ -1,5 +1,4 @@
 
-
 import React from 'react';
 import { Icons } from '@/components/icons';
 import { cn } from '@/lib/utils';
@@ -153,8 +152,8 @@ export function ImageSourceToggle({ value, onChange }: ImageSourceToggleProps) {
       <div
         className={cn(
           "absolute rounded-full transition-all duration-300 ease-out pointer-events-none z-0",
-          "bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700",
-          "shadow-lg shadow-blue-500/50",
+          "bg-gradient-to-r from-orange-500 via-orange-600 to-amber-600",
+          "shadow-lg shadow-orange-500/50",
           isAnimating && "animate-glow"
         )}
         style={indicatorStyle}
@@ -190,4 +189,3 @@ export function ImageSourceToggle({ value, onChange }: ImageSourceToggleProps) {
     </div>
   );
 }
-
