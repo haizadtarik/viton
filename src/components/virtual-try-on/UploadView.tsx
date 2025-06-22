@@ -37,7 +37,7 @@ export function UploadView({ onUpload, title, className }: UploadViewProps) {
       {...getRootProps()}
       className={cn(
         `w-full h-full rounded-3xl border-4 border-dashed flex items-center justify-center text-center p-4 cursor-pointer transition-colors`,
-        isDragActive ? 'border-blue-500 bg-blue-50' : 'border-slate-300 bg-slate-100/50',
+        isDragActive ? 'border-orange-500 bg-gradient-to-br from-orange-50 to-amber-50' : 'border-slate-300 bg-slate-100/50',
         className
       )}
     >
