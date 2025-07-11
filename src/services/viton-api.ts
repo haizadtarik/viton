@@ -1,3 +1,4 @@
+
 // This service connects to the backend virtual try-on API.
 
 // The backend is hosted on a different domain, so we use the full URL.
@@ -21,44 +22,73 @@ export const vitonApi = {
         garment_image_base64: getBase64Data(garment_image_base64),
     };
 
-    const response = await fetch(API_URL, {
-        method: 'POST',
-        mode: 'cors',
-        cache: 'no-cache',
-        headers: {
-            'Content-Type': 'application/json',
-            'Accept': 'application/json',
-        },
-        body: JSON.stringify(requestBody),
+    console.log("Request body structure:", {
+        model_image_length: requestBody.model_image_base64.length,
+        garment_image_length: requestBody.garment_image_base64.length
     });
 
-    if (!response.ok) {
-        let errorData;
-        try {
-            errorData = await response.json();
-        } catch (e) {
-            errorData = { error: `Request failed with status ${response.status}` };
+    try {
+        const response = await fetch(API_URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(requestBody),
+        });
+
+        console.log("Response status:", response.status);
+        console.log("Response headers:", Object.fromEntries(response.headers.entries()));
+
+        if (!response.ok) {
+            let errorData;
+            try {
+                const responseText = await response.text();
+                console.log("Error response text:", responseText);
+                try {
+                    errorData = JSON.parse(responseText);
+                } catch (parseError) {
+                    errorData = { error: responseText || `Request failed with status ${response.status}` };
+                }
+            } catch (e) {
+                errorData = { error: `Request failed with status ${response.status}` };
+            }
+            console.error("API Error:", errorData);
+            throw new Error(errorData.error || errorData.detail?.[0]?.msg || `Request failed with status ${response.status}`);
         }
-        console.error("API Error:", errorData);
-        throw new Error(errorData.error || errorData.detail?.[0]?.msg || `Request failed with status ${response.status}`);
+
+        const responseText = await response.text();
+        console.log("Response text length:", responseText.length);
+        console.log("Response text preview:", responseText.substring(0, 200) + "...");
+
+        let result;
+        try {
+            result = JSON.parse(responseText);
+        } catch (parseError) {
+            console.error("Failed to parse response as JSON:", parseError);
+            throw new Error("Invalid response format from API");
+        }
+
+        if (result.error) {
+            console.error("API returned a specific error:", result.error);
+            throw new Error(result.error);
+        }
+
+        if (!result.images_base64 || result.images_base64.length === 0) {
+            console.error("API returned no images in the response. Full response:", result);
+            throw new Error("The API did not return any images.");
+        }
+        
+        console.log("Viton API call successful, received", result.images_base64.length, "images.");
+
+        // The API returns raw base64 strings. We format them as data URLs
+        // so they can be rendered in <img> tags.
+        return result.images_base64.map((imgBase64: string) => `data:image/jpeg;base64,${imgBase64}`);
+    } catch (error) {
+        console.error("Fetch error details:", error);
+        if (error instanceof TypeError && error.message === 'Load failed') {
+            throw new Error("Network error: Unable to connect to the API. Please check your internet connection and try again.");
+        }
+        throw error;
     }
-
-    const result = await response.json();
-
-    if (result.error) {
-        console.error("API returned a specific error:", result.error);
-        throw new Error(result.error);
-    }
-
-    if (!result.images_base64 || result.images_base64.length === 0) {
-        console.error("API returned no images in the response.");
-        throw new Error("The API did not return any images.");
-    }
-    
-    console.log("Viton API call successful, received images.");
-
-    // The API returns raw base64 strings. We format them as data URLs
-    // so they can be rendered in <img> tags.
-    return result.images_base64.map((imgBase64: string) => `data:image/jpeg;base64,${imgBase64}`);
   },
 };
