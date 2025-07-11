@@ -1,4 +1,5 @@
 
+
 // This service connects to the backend virtual try-on API.
 
 // The backend is hosted on a different domain, so we use the full URL.
@@ -27,14 +28,28 @@ export const vitonApi = {
         garment_image_length: requestBody.garment_image_base64.length
     });
 
+    // Create an AbortController for timeout handling
+    const controller = new AbortController();
+    
+    // Set timeout to 6 minutes (slightly more than the expected 5 minutes)
+    const timeoutId = setTimeout(() => {
+        controller.abort();
+    }, 6 * 60 * 1000); // 6 minutes in milliseconds
+
     try {
+        console.log("Starting API request - this may take up to 5 minutes...");
+        
         const response = await fetch(API_URL, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify(requestBody),
+            signal: controller.signal,
         });
+
+        // Clear the timeout since we got a response
+        clearTimeout(timeoutId);
 
         console.log("Response status:", response.status);
         console.log("Response headers:", Object.fromEntries(response.headers.entries()));
@@ -84,11 +99,22 @@ export const vitonApi = {
         // so they can be rendered in <img> tags.
         return result.images_base64.map((imgBase64: string) => `data:image/jpeg;base64,${imgBase64}`);
     } catch (error) {
+        // Clear timeout in case of error
+        clearTimeout(timeoutId);
+        
         console.error("Fetch error details:", error);
-        if (error instanceof TypeError && error.message === 'Load failed') {
-            throw new Error("Network error: Unable to connect to the API. Please check your internet connection and try again.");
+        
+        if (error instanceof Error) {
+            if (error.name === 'AbortError') {
+                throw new Error("Request timed out after 6 minutes. The API might be taking longer than expected or experiencing issues.");
+            }
+            if (error.message === 'Load failed') {
+                throw new Error("Network error: Unable to connect to the API. This might be due to CORS issues or the API being temporarily unavailable.");
+            }
         }
+        
         throw error;
     }
   },
 };
+
