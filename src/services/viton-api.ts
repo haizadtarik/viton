@@ -1,5 +1,6 @@
 
 
+
 // This service connects to the backend virtual try-on API.
 
 // The backend is hosted on a different domain, so we use the full URL.
@@ -31,27 +32,40 @@ export const vitonApi = {
     // Create an AbortController for timeout handling
     const controller = new AbortController();
     
-    // Set timeout to 6 minutes (slightly more than the expected 5 minutes)
+    // Set timeout to 7 minutes to give more time for the API
     const timeoutId = setTimeout(() => {
+        console.log("Request is being aborted due to timeout");
         controller.abort();
-    }, 6 * 60 * 1000); // 6 minutes in milliseconds
+    }, 7 * 60 * 1000); // 7 minutes in milliseconds
 
     try {
         console.log("Starting API request - this may take up to 5 minutes...");
+        console.log("Request URL:", API_URL);
+        console.log("Request method: POST");
+        console.log("Content-Type: application/json");
+        
+        // Test if we can reach the API first
+        console.log("Testing API connectivity...");
         
         const response = await fetch(API_URL, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                'Origin': window.location.origin,
             },
             body: JSON.stringify(requestBody),
             signal: controller.signal,
+            mode: 'cors', // Explicitly set CORS mode
         });
 
         // Clear the timeout since we got a response
         clearTimeout(timeoutId);
-
+        
+        console.log("Response received!");
         console.log("Response status:", response.status);
+        console.log("Response statusText:", response.statusText);
+        console.log("Response ok:", response.ok);
         console.log("Response headers:", Object.fromEntries(response.headers.entries()));
 
         if (!response.ok) {
@@ -102,14 +116,25 @@ export const vitonApi = {
         // Clear timeout in case of error
         clearTimeout(timeoutId);
         
-        console.error("Fetch error details:", error);
+        console.error("Detailed fetch error:", {
+            name: error instanceof Error ? error.name : 'Unknown',
+            message: error instanceof Error ? error.message : 'Unknown error',
+            stack: error instanceof Error ? error.stack : undefined,
+            error: error
+        });
         
         if (error instanceof Error) {
             if (error.name === 'AbortError') {
-                throw new Error("Request timed out after 6 minutes. The API might be taking longer than expected or experiencing issues.");
+                throw new Error("Request timed out after 7 minutes. The API might be experiencing heavy load or issues.");
             }
             if (error.message === 'Load failed') {
-                throw new Error("Network error: Unable to connect to the API. This might be due to CORS issues or the API being temporarily unavailable.");
+                throw new Error("Network connection failed. This could be due to:\n1. CORS policy blocking the request\n2. API server being down\n3. Network connectivity issues\n\nPlease check the browser console for more details.");
+            }
+            if (error.message.includes('CORS')) {
+                throw new Error("CORS error: The API server needs to allow requests from this domain.");
+            }
+            if (error.message.includes('fetch')) {
+                throw new Error("Network fetch failed. Please check your internet connection and try again.");
             }
         }
         
@@ -117,4 +142,5 @@ export const vitonApi = {
     }
   },
 };
+
 
