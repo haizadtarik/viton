@@ -38,6 +38,11 @@ export const vitonApi = {
         controller.abort();
     }, 7 * 60 * 1000); // 7 minutes in milliseconds
 
+    // Add periodic status logging
+    const statusInterval = setInterval(() => {
+        console.log("API request still in progress...");
+    }, 30000); // Log every 30 seconds
+
     try {
         console.log("Starting API request - this may take up to 5 minutes...");
         console.log("Request URL:", API_URL);
@@ -59,8 +64,9 @@ export const vitonApi = {
             mode: 'cors', // Explicitly set CORS mode
         });
 
-        // Clear the timeout since we got a response
+        // Clear the timeout and status interval since we got a response
         clearTimeout(timeoutId);
+        clearInterval(statusInterval);
         
         console.log("Response received!");
         console.log("Response status:", response.status);
@@ -113,8 +119,9 @@ export const vitonApi = {
         // so they can be rendered in <img> tags.
         return result.images_base64.map((imgBase64: string) => `data:image/jpeg;base64,${imgBase64}`);
     } catch (error) {
-        // Clear timeout in case of error
+        // Clear timeout and status interval in case of error
         clearTimeout(timeoutId);
+        clearInterval(statusInterval);
         
         console.error("Detailed fetch error:", {
             name: error instanceof Error ? error.name : 'Unknown',
@@ -142,5 +149,3 @@ export const vitonApi = {
     }
   },
 };
-
-
