@@ -1,6 +1,4 @@
 
-
-
 // This service connects to the backend virtual try-on API.
 
 // The backend is hosted on a different domain, so we use the full URL.
@@ -22,11 +20,19 @@ export const vitonApi = {
     const requestBody = {
         model_image_base64: getBase64Data(model_image_base64),
         garment_image_base64: getBase64Data(garment_image_base64),
+        n_samples: 1,
+        n_steps: 20,
+        image_scale: 2.0,
+        seed: -1
     };
 
     console.log("Request body structure:", {
         model_image_length: requestBody.model_image_base64.length,
-        garment_image_length: requestBody.garment_image_base64.length
+        garment_image_length: requestBody.garment_image_base64.length,
+        n_samples: requestBody.n_samples,
+        n_steps: requestBody.n_steps,
+        image_scale: requestBody.image_scale,
+        seed: requestBody.seed
     });
 
     // Create an AbortController for timeout handling
@@ -132,10 +138,10 @@ export const vitonApi = {
         
         if (error instanceof Error) {
             if (error.name === 'AbortError') {
-                throw new Error("Request timed out after 7 minutes. The API might be experiencing heavy load or issues.");
+                throw new Error("Request timed out after 7 minutes. The API might be experiencing heavy load or issues. Please try again.");
             }
             if (error.message === 'Load failed') {
-                throw new Error("Network connection failed. This could be due to:\n1. CORS policy blocking the request\n2. API server being down\n3. Network connectivity issues\n\nPlease check the browser console for more details.");
+                throw new Error("Network connection failed. Please check your internet connection and try again.");
             }
             if (error.message.includes('CORS')) {
                 throw new Error("CORS error: The API server needs to allow requests from this domain.");

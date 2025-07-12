@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useTryOnStore } from '@/store/try-on-store';
 import { Icons } from '../icons';
@@ -24,20 +23,27 @@ export function GarmentUpload() {
         toast({ title: "Missing Images", description: "Please provide both a model and a garment image.", variant: "destructive" });
         return;
     }
+    
     setAppState('LOADING');
+    
     try {
+        console.log("Starting virtual try-on generation...");
         const results = await vitonApi.generate(modelImage, garmentImage);
+        console.log("Generation successful, received results:", results.length);
         setResultImages(results);
         setAppState('RESULT');
     } catch (error) {
         console.error("Error generating try-on:", error);
         const errorMessage = error instanceof Error ? error.message : "An unknown error occurred. Please try again.";
+        
         toast({
           title: "Generation Failed",
           description: errorMessage,
           variant: "destructive",
           duration: 9000,
         });
+        
+        // Return to garment upload state so user can retry
         setAppState('GARMENT_UPLOAD');
     }
   };
