@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useTryOnStore } from '@/store/try-on-store';
 import { Icons } from '../icons';
@@ -12,6 +13,7 @@ import { UrlView } from './UrlView';
 export function GarmentUpload() {
   const { modelImage, garmentImage, setGarmentImage, setAppState, setResultImages } = useTryOnStore();
   const [source, setSource] = useState<'upload' | 'camera' | 'url'>('upload');
+  const [isGenerating, setIsGenerating] = useState(false);
   const { toast } = useToast();
 
   const handleImageProvided = (dataUrl: string) => {
@@ -20,20 +22,30 @@ export function GarmentUpload() {
   
   const handleGenerate = async () => {
     if (!modelImage || !garmentImage) {
-        toast({ title: "Missing Images", description: "Please provide both a model and a garment image.", variant: "destructive" });
+        toast({ 
+          title: "Missing Images", 
+          description: "Please provide both a model and a garment image.", 
+          variant: "destructive" 
+        });
         return;
     }
     
+    setIsGenerating(true);
     setAppState('LOADING');
     
     try {
         console.log("Starting virtual try-on generation...");
+        console.log("Model image length:", modelImage.length);
+        console.log("Garment image length:", garmentImage.length);
+        
         const results = await vitonApi.generate(modelImage, garmentImage);
         console.log("Generation successful, received results:", results.length);
+        
         setResultImages(results);
         setAppState('RESULT');
     } catch (error) {
         console.error("Error generating try-on:", error);
+        
         const errorMessage = error instanceof Error ? error.message : "An unknown error occurred. Please try again.";
         
         toast({
@@ -43,8 +55,10 @@ export function GarmentUpload() {
           duration: 9000,
         });
         
-        // Return to garment upload state so user can retry
+        // Reset states properly
         setAppState('GARMENT_UPLOAD');
+    } finally {
+        setIsGenerating(false);
     }
   };
 
@@ -53,7 +67,13 @@ export function GarmentUpload() {
           return (
               <div className="w-64 h-80 rounded-3xl bg-slate-200 overflow-hidden shadow-lg relative">
                   <img src={garmentImage} alt="Garment" className="w-full h-full object-contain"/>
-                  <Button onClick={() => setGarmentImage(null)} variant="secondary" size="sm" className="absolute top-2 right-2 rounded-full">
+                  <Button 
+                    onClick={() => setGarmentImage(null)} 
+                    variant="secondary" 
+                    size="sm" 
+                    className="absolute top-2 right-2 rounded-full"
+                    disabled={isGenerating}
+                  >
                       Change
                   </Button>
               </div>
@@ -91,9 +111,14 @@ export function GarmentUpload() {
                 {renderGarmentSelector()}
             </div>
         </div>
-        <Button onClick={handleGenerate} size="lg" className="rounded-full px-8 py-6 text-lg font-semibold shadow-lg" disabled={!garmentImage}>
+        <Button 
+          onClick={handleGenerate} 
+          size="lg" 
+          className="rounded-full px-8 py-6 text-lg font-semibold shadow-lg" 
+          disabled={!garmentImage || isGenerating}
+        >
             <Icons.Sparkles className="mr-2 h-5 w-5"/>
-            Generate Try-On
+            {isGenerating ? 'Generating...' : 'Generate Try-On'}
         </Button>
     </div>
   );
