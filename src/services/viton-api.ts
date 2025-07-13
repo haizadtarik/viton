@@ -17,13 +17,22 @@ export const vitonApi = {
   generate: async (model_image_base64: string, garment_image_base64: string): Promise<string[]> => {
     console.log("Calling real Viton API at:", API_URL);
 
-    const formData = new FormData();
-    formData.append('model_image_base64', getBase64Data(model_image_base64));
-    formData.append('garment_image_base64', getBase64Data(garment_image_base64));
+    const requestBody = {
+        model_image_base64: getBase64Data(model_image_base64),
+        garment_image_base64: getBase64Data(garment_image_base64),
+        prompt: "",
+        n_samples: 1,
+        n_steps: 20,
+        image_scale: 2,
+        seed: -1
+    };
 
     const response = await fetch(API_URL, {
         method: 'POST',
-        body: formData,
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(requestBody),
     });
 
     if (!response.ok) {
