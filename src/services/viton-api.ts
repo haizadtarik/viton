@@ -2,7 +2,7 @@
 // This service connects to the backend virtual try-on API.
 
 // The backend is hosted on a different domain, so we use the full URL.
-const API_URL = 'https://haizadtarik--vton-vtonapp-fastapi-app.modal.run/viton';
+const API_URL = 'https://haizadtarik--vton-ootd-flux-vtonserver-fastapi-app.modal.run/';
 
 // Helper to strip the data URL prefix (e.g., "data:image/jpeg;base64,")
 // as the API likely expects raw base64 data.
