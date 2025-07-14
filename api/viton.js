@@ -1,4 +1,4 @@
-module.exports = async (req, res) => {
+export default async function handler(req, res) {
   // Set CORS headers for all requests
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -45,4 +45,4 @@ module.exports = async (req, res) => {
       details: error instanceof Error ? error.message : 'Unknown error'
     });
   }
-};
+}
