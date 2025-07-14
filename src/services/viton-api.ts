@@ -1,8 +1,8 @@
 
 // This service connects to the backend virtual try-on API.
 
-// The backend is hosted on a different domain, so we use the full URL.
-const API_URL = 'https://haizadtarik--vton-ootd-flux-vtonserver-fastapi-app.modal.run/viton';
+// Get the API URL from environment variable or use fallback
+const API_URL = __SERVER_URL__;
 
 // Helper to ensure we get clean base64 data
 const getBase64Data = (dataUrl: string) => {
@@ -34,12 +34,20 @@ export const vitonApi = {
         seed: -1
     };
 
-    const response = await fetch(API_URL, {
+    // Use proxy in development to avoid CORS issues
+    const url = import.meta.env.DEV ? '/api/viton' : API_URL;
+
+    const response = await fetch(url, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
             'Accept': 'application/json',
+            'Origin': window.location.origin,
+            'Access-Control-Request-Method': 'POST',
+            'Access-Control-Request-Headers': 'Content-Type, Accept',
         },
+        mode: 'cors',
+        credentials: 'omit',
         body: JSON.stringify(requestBody),
     });
 
