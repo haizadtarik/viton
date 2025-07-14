@@ -1,0 +1,7 @@
+{
+  "functions": {
+    "api/viton.ts": {
+      "maxDuration": 300
+    }
+  }
+}

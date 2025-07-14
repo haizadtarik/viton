@@ -14,7 +14,7 @@ const getBase64Data = (dataUrl: string) => {
 
 export const vitonApi = {
   generate: async (model_image_base64: string, garment_image_base64: string): Promise<string[]> => {
-    console.log("Calling real Viton API at:", API_URL);
+    console.log("Calling Viton API via proxy");
 
     const modelBase64 = getBase64Data(model_image_base64);
     const garmentBase64 = getBase64Data(garment_image_base64);
@@ -34,20 +34,15 @@ export const vitonApi = {
         seed: -1
     };
 
-    // Use proxy in development to avoid CORS issues
-    const url = import.meta.env.DEV ? '/api/viton' : API_URL;
+    // Use proxy in development to avoid CORS issues, use Vercel API route in production
+    const url = import.meta.env.DEV ? '/api/viton' : '/api/viton';
 
     const response = await fetch(url, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'Accept': 'application/json',
-            'Origin': window.location.origin,
-            'Access-Control-Request-Method': 'POST',
-            'Access-Control-Request-Headers': 'Content-Type, Accept',
         },
         mode: 'cors',
-        credentials: 'omit',
         body: JSON.stringify(requestBody),
     });
 
