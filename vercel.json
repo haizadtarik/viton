@@ -1,7 +1,6 @@
 {
   "functions": {
-    "api/viton.ts": {
-      "runtime": "nodejs20.x",
+    "api/viton.js": {
       "maxDuration": 300
     }
   }

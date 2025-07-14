@@ -1,6 +1,4 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node';
-
-const handler = async (req: VercelRequest, res: VercelResponse) => {
+module.exports = async (req, res) => {
   // Set CORS headers for all requests
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -48,5 +46,3 @@ const handler = async (req: VercelRequest, res: VercelResponse) => {
     });
   }
 };
-
-export default handler;
