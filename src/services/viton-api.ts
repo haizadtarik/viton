@@ -37,7 +37,8 @@ export const vitonApi = {
     const response = await fetch(API_URL, {
         method: 'POST',
         headers: {
-            'Content-Type': 'text/plain',
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
         },
         body: JSON.stringify(requestBody),
     });
