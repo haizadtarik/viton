@@ -42,7 +42,6 @@ export const vitonApi = {
         headers: {
             'Content-Type': 'application/json',
         },
-        mode: 'cors',
         body: JSON.stringify(requestBody),
     });
 
