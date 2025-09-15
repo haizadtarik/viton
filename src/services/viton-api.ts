@@ -34,8 +34,8 @@ export const vitonApi = {
         seed: -1
     };
 
-    // Resolve Viton endpoint from __SERVER_URL__ (supports base or full path)
-    const url = API_URL.endsWith('/viton') ? API_URL : `${API_URL.replace(/\/$/, '')}/viton`;
+    // Use proxy in development and serverless function in production to avoid CORS
+    const url = '/api/viton';
     console.log("Using Viton endpoint:", url);
 
     const response = await fetch(url, {
