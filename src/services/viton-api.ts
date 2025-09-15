@@ -34,8 +34,9 @@ export const vitonApi = {
         seed: -1
     };
 
-    // Use proxy in development to avoid CORS issues, use Vercel API route in production
-    const url = import.meta.env.DEV ? '/api/viton' : '/api/viton';
+    // Resolve Viton endpoint from __SERVER_URL__ (supports base or full path)
+    const url = API_URL.endsWith('/viton') ? API_URL : `${API_URL.replace(/\/$/, '')}/viton`;
+    console.log("Using Viton endpoint:", url);
 
     const response = await fetch(url, {
         method: 'POST',
