@@ -8,8 +8,11 @@ export function ResultView() {
 
   const handleDownload = () => {
     const link = document.createElement('a');
-    link.href = resultImages[0];
-    link.download = 'virtual-try-on-result.jpeg';
+    const src = resultImages[0];
+    link.href = src;
+    const mime = src.split(';')[0].split(':')[1] || 'image/jpeg';
+    const ext = mime.split('/')[1] || 'jpeg';
+    link.download = `virtual-try-on-result.${ext}`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);

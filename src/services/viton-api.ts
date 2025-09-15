@@ -12,6 +12,16 @@ const getBase64Data = (dataUrl: string) => {
     return dataUrl;
 };
 
+// Simple base64 signature-based mime detection
+const detectMimeType = (b64: string): string => {
+    const head = b64.substring(0, 10);
+    if (head.startsWith('/9j/')) return 'image/jpeg'; // JPEG
+    if (head.startsWith('iVBORw0KG')) return 'image/png'; // PNG
+    if (head.startsWith('R0lGOD')) return 'image/gif'; // GIF
+    if (head.startsWith('UklGR')) return 'image/webp'; // WebP
+    return 'image/jpeg';
+};
+
 export const vitonApi = {
   generate: async (model_image_base64: string, garment_image_base64: string): Promise<string[]> => {
     console.log("Calling Viton API via proxy");
@@ -73,6 +83,9 @@ export const vitonApi = {
 
     // The API returns raw base64 strings. We format them as data URLs
     // so they can be rendered in <img> tags.
-    return result.images_base64.map((imgBase64: string) => `data:image/jpeg;base64,${imgBase64}`);
+    return result.images_base64.map((imgBase64: string) => {
+      const mime = detectMimeType(imgBase64);
+      return `data:${mime};base64,${imgBase64}`;
+    });
   },
 };
