@@ -17,8 +17,8 @@ export default async function handler(req, res) {
   try {
     const serverUrl = process.env.SERVER_URL || 'https://haizadtarik--vton-ootd-flux-vtonserver-fastapi-app.modal.run';
     
-    // Forward the request to your Modal server
-    const response = await fetch(serverUrl, {
+    // Forward the request to your Modal server's /viton endpoint
+    const response = await fetch(`${serverUrl}/viton`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
