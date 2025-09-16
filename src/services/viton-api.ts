@@ -44,10 +44,9 @@ export const vitonApi = {
         seed: -1
     };
 
-    // Use proxy in development/preview, direct endpoint in production
-    const isProduction = typeof window !== 'undefined' && window.location.hostname.includes('lovable.app');
-    const url = isProduction ? API_URL : '/api/viton';
-    console.log("Using Viton endpoint:", url, isProduction ? "(production)" : "(development)");
+    // Always use the proxy route to avoid CORS issues in all environments
+    const url = '/api/viton';
+    console.log("Using Viton endpoint:", url);
 
     const response = await fetch(url, {
         method: 'POST',
