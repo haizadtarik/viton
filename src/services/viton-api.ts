@@ -44,9 +44,8 @@ export const vitonApi = {
         seed: -1
     };
 
-    // Choose endpoint: use local proxy in dev, direct server in production
-    const isLocal = typeof window !== 'undefined' && /^(localhost|127\.0\.0\.1)$/i.test(window.location.hostname);
-    const url = isLocal ? '/api/viton' : API_URL;
+    // Always use the proxy route to avoid CORS issues
+    const url = '/api/viton';
     console.log("Using Viton endpoint:", url);
 
     const response = await fetch(url, {
