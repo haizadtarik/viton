@@ -44,8 +44,9 @@ export const vitonApi = {
         seed: -1
     };
 
-    // Use proxy in development and serverless function in production to avoid CORS
-    const url = '/api/viton';
+    // Choose endpoint: use local proxy in dev, direct server in production
+    const isLocal = typeof window !== 'undefined' && /^(localhost|127\.0\.0\.1)$/i.test(window.location.hostname);
+    const url = isLocal ? '/api/viton' : API_URL;
     console.log("Using Viton endpoint:", url);
 
     const response = await fetch(url, {
@@ -55,6 +56,13 @@ export const vitonApi = {
         },
         body: JSON.stringify(requestBody),
     });
+
+    const contentType = response.headers.get('content-type') || '';
+    if (!contentType.includes('application/json')) {
+        const text = await response.text().catch(() => '');
+        console.error('Unexpected non-JSON response from Viton endpoint:', { contentType, sample: text.slice(0, 200) });
+        throw new Error('Unexpected response from server. Please try again.');
+    }
 
     if (!response.ok) {
         let errorData;
