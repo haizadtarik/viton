@@ -22,17 +22,61 @@ const detectMimeType = (b64: string): string => {
     return 'image/jpeg';
 };
 
+const tryApiCall = async (url: string, requestBody: any, isProxy: boolean = false): Promise<any> => {
+  console.log(`Attempting ${isProxy ? 'proxy' : 'direct'} API call to:`, url);
+  
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(requestBody),
+  });
+
+  // Check if proxy is not available (404, 502, etc.)
+  if (isProxy && (response.status === 404 || response.status === 502 || response.status === 503)) {
+    console.log('Proxy endpoint not available, status:', response.status);
+    throw new Error('PROXY_NOT_AVAILABLE');
+  }
+
+  const contentType = response.headers.get('content-type') || '';
+  if (!contentType.includes('application/json')) {
+    const text = await response.text().catch(() => '');
+    console.error(`Unexpected non-JSON response from ${isProxy ? 'proxy' : 'direct'} endpoint:`, { 
+      contentType, 
+      status: response.status,
+      sample: text.slice(0, 200) 
+    });
+    
+    if (isProxy) {
+      throw new Error('PROXY_NOT_AVAILABLE');
+    }
+    throw new Error('Unexpected response from server. Please try again.');
+  }
+
+  if (!response.ok) {
+    let errorData;
+    try {
+      errorData = await response.json();
+    } catch (e) {
+      errorData = { error: `Request failed with status ${response.status}` };
+    }
+    console.error(`${isProxy ? 'Proxy' : 'Direct'} API Error:`, errorData);
+    throw new Error(errorData.error || errorData.detail?.[0]?.msg || `Request failed with status ${response.status}`);
+  }
+
+  return response.json();
+};
+
 export const vitonApi = {
   generate: async (model_image_base64: string, garment_image_base64: string): Promise<string[]> => {
-    console.log("Calling Viton API via proxy");
+    console.log("Starting Viton API generation...");
 
     const modelBase64 = getBase64Data(model_image_base64);
     const garmentBase64 = getBase64Data(garment_image_base64);
 
     console.log("Model image base64 length:", modelBase64.length);
     console.log("Garment image base64 length:", garmentBase64.length);
-    console.log("Model base64 starts with:", modelBase64.substring(0, 50));
-    console.log("Garment base64 starts with:", garmentBase64.substring(0, 50));
 
     const requestBody = {
         model_image_base64: modelBase64,
@@ -44,37 +88,28 @@ export const vitonApi = {
         seed: -1
     };
 
-    // Always use the proxy route to avoid CORS issues in all environments
-    const url = '/api/viton';
-    console.log("Using Viton endpoint:", url);
-
-    const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestBody),
-    });
-
-    const contentType = response.headers.get('content-type') || '';
-    if (!contentType.includes('application/json')) {
-        const text = await response.text().catch(() => '');
-        console.error('Unexpected non-JSON response from Viton endpoint:', { contentType, sample: text.slice(0, 200) });
-        throw new Error('Unexpected response from server. Please try again.');
-    }
-
-    if (!response.ok) {
-        let errorData;
+    let result;
+    
+    try {
+      // First, try the proxy endpoint
+      result = await tryApiCall('/api/viton', requestBody, true);
+      console.log("Proxy API call successful");
+    } catch (error) {
+      if (error instanceof Error && error.message === 'PROXY_NOT_AVAILABLE') {
+        console.log("Proxy not available, falling back to direct API call");
         try {
-            errorData = await response.json();
-        } catch (e) {
-            errorData = { error: `Request failed with status ${response.status}` };
+          // Fallback to direct API call
+          result = await tryApiCall(API_URL, requestBody, false);
+          console.log("Direct API call successful");
+        } catch (directError) {
+          console.error("Both proxy and direct API calls failed:", directError);
+          throw directError;
         }
-        console.error("API Error:", errorData);
-        throw new Error(errorData.error || errorData.detail?.[0]?.msg || `Request failed with status ${response.status}`);
+      } else {
+        console.error("Proxy API call failed:", error);
+        throw error;
+      }
     }
-
-    const result = await response.json();
 
     if (result.error) {
         console.error("API returned a specific error:", result.error);
@@ -86,7 +121,7 @@ export const vitonApi = {
         throw new Error("The API did not return any images.");
     }
     
-    console.log("Viton API call successful, received images.");
+    console.log("Viton API generation completed successfully, received images.");
 
     // The API returns raw base64 strings. We format them as data URLs
     // so they can be rendered in <img> tags.
